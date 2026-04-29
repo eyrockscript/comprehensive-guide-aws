@@ -1,0 +1,44 @@
+name: Link Checker
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  linkcheck:
+    name: Check Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check@3.12.2
+
+      - name: Check links in markdown files
+        run: |
+          find . -name "*.md" -not -path "./node_modules/*" -exec markdown-link-check {} \; 2>&1 | tee link-check-output.txt
+
+      - name: Upload link check results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-check-results
+          path: link-check-output.txt
+
+      - name: Check for broken links
+        run: |
+          if grep -q "ERROR" link-check-output.txt; then
+            echo "::error::Found broken links. Check the artifact for details."
+            exit 1
+          fi

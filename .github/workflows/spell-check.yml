@@ -1,0 +1,39 @@
+name: Spell Check
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  spellcheck:
+    name: Check Spelling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install cspell
+        run: npm install -g cspell@8.14.0
+
+      - name: Run spell check
+        run: |
+          cspell "**/*.md" \
+            --config .cspell.json \
+            --no-progress \
+            --show-suggestions || true
+
+      - name: Annotate results
+        if: failure()
+        run: echo "::error::Spell check found issues. Please review and fix them."

@@ -1,0 +1,107 @@
+%% Data Lake and Analytics Architecture
+%% Author: AWS Guides
+%% Description: Modern data lake architecture with analytics and ML capabilities
+
+graph TB
+    subgraph "Data Sources"
+        S3_Raw[(S3 Raw Zone)]
+        Kinesis[Kinesis Data Streams]
+        DMS[AWS DMS]
+        OnPrem_DB[(On-Premises DB)]
+        SaaS[SaaS Applications]
+    end
+
+    subgraph "Ingestion Layer"
+        Kinesis_Firehose[Kinesis Firehose]
+        Lambda_Ingest[Lambda Ingestion]
+        Glue_Crawler[Glue Crawlers]
+    end
+
+    subgraph "Storage Layer"
+        subgraph "Data Lake Zones"
+            S3_Bronze[(Bronze Zone<br/>Raw Data)]
+            S3_Silver[(Silver Zone<br/>Cleaned Data)]
+            S3_Gold[(Gold Zone<br/>Aggregated)]
+        end
+
+        subgraph "Data Catalog"
+            Glue_Catalog[(Glue Data Catalog)]
+            Lake_Formation[Lake Formation]
+        end
+    end
+
+    subgraph "Processing Layer"
+        EMR[EMR Spark]
+        Glue_ETL[Glue ETL Jobs]
+        Lambda_Process[Lambda Processing]
+        StepFunctions[Step Functions]
+    end
+
+    subgraph "Analytics & ML"
+        subgraph "Query Engines"
+            Athena[Athena]
+            Redshift[Redshift Spectrum]
+            QuickSight[QuickSight]
+        end
+
+        subgraph "Machine Learning"
+            SageMaker[SageMaker]
+            Comprehend[Comprehend]
+            Personalize[Personalize]
+        end
+    end
+
+    subgraph "Serving Layer"
+        API_GW[API Gateway]
+        AppSync[AppSync]
+    end
+
+    subgraph "Governance"
+        CloudWatch[CloudWatch]
+        CloudTrail[CloudTrail]
+    end
+
+    OnPrem_DB -->|CDC| DMS
+    DMS --> S3_Raw
+    SaaS -->|API| Lambda_Ingest
+    Lambda_Ingest --> S3_Raw
+    Kinesis --> Kinesis_Firehose
+    Kinesis_Firehose --> S3_Raw
+
+    S3_Raw -->|Crawl| Glue_Crawler
+    Glue_Crawler --> Glue_Catalog
+    Glue_Catalog -.-> Lake_Formation
+
+    S3_Raw -->|ETL| Glue_ETL
+    S3_Raw -->|Transform| EMR
+    Glue_ETL -->|Clean| S3_Silver
+    EMR -->|Process| S3_Silver
+
+    S3_Silver -->|Aggregate| Lambda_Process
+    Lambda_Process --> StepFunctions
+    StepFunctions -->|Load| S3_Gold
+
+    S3_Gold -->|Query| Athena
+    S3_Gold -->|Analyze| Redshift
+    Athena -->|Visualize| QuickSight
+    Redshift -->|Visualize| QuickSight
+
+    S3_Gold -->|Train| SageMaker
+    S3_Gold -->|NLP| Comprehend
+    S3_Gold -->|Recommend| Personalize
+
+    SageMaker -->|Serve| API_GW
+    QuickSight -->|Embed| AppSync
+
+    Glue_ETL -.->|Logs| CloudWatch
+    EMR -.->|Logs| CloudWatch
+    Lake_Formation -.->|Audit| CloudTrail
+
+    style S3_Bronze fill:#FF9900
+    style S3_Silver fill:#FF9900
+    style S3_Gold fill:#FF9900
+    style Glue_Catalog fill:#FF9900
+    style Glue_ETL fill:#FF9900
+    style Athena fill:#FF9900
+    style QuickSight fill:#FF9900
+    style SageMaker fill:#FF9900

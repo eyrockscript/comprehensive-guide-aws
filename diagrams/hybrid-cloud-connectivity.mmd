@@ -1,0 +1,97 @@
+%% Hybrid Cloud Connectivity
+%% Author: AWS Guides
+%% Description: Hybrid architecture connecting on-premises to AWS
+
+graph TB
+    subgraph "On-Premises Data Center"
+        DC_Router[Router]
+        DC_Firewall[Firewall]
+
+        subgraph "Local Infrastructure"
+            DC_AD[Active Directory]
+            DC_DB[(Oracle DB)]
+            DC_App[Legacy Apps]
+            DC_Files[File Servers]
+        end
+    end
+
+    subgraph "AWS Cloud"
+        subgraph "Direct Connect Location"
+            DX_Router[DX Router]
+            VGW[Virtual Private Gateway]
+        end
+
+        subgraph "VPC"
+            subgraph "Public Subnet"
+                TGW[Transit Gateway]
+                VPN[Site-to-Site VPN]
+            end
+
+            subgraph "Private Subnets"
+                subgraph "Production"
+                    Prod_ALB[ALB]
+                    Prod_ASG[Auto Scaling]
+                    Prod_RDS[(RDS)]
+                end
+
+                subgraph "Development"
+                    Dev_EC2[EC2 Instances]
+                end
+            end
+
+            subgraph "Shared Services"
+                AD_DS[Directory Service<br/>Managed AD]
+                DNS[Route 53<br/>Resolver]
+            end
+        end
+
+        subgraph "Gateway Services"
+            Storage_GW[Storage Gateway]
+            DirectConnect[Direct Connect]
+        end
+
+        subgraph "Multi-Region"
+            TGW_Peer[Transit Gateway<br/>Peering]
+            DR_VPC[DR VPC]
+        end
+    end
+
+    subgraph "Monitoring & Management"
+        SSM[Systems Manager]
+        CloudWatch[CloudWatch]
+    end
+
+    DC_App -->|Query| DC_DB
+    DC_Files -->|Sync| Storage_GW
+    DC_AD -->|AD Trust| AD_DS
+
+    DC_Router -->|VPN Tunnel| VPN
+    DC_Router -->|Dedicated| DX_Router
+
+    DX_Router --> VGW
+    VGW --> TGW
+    VPN --> TGW
+
+    TGW -->|Route| Prod_ALB
+    TGW -->|Route| Dev_EC2
+    TGW -->|Route| AD_DS
+    TGW -->|Peering| TGW_Peer
+
+    Prod_ALB --> Prod_ASG
+    Prod_ASG --> Prod_RDS
+    Prod_ASG -->|Auth| AD_DS
+
+    Storage_GW -.->|Cache| S3_Storage[(S3 Storage)]
+
+    Prod_ASG -.->|Management| SSM
+    Dev_EC2 -.->|Management| SSM
+    SSM -.->|Metrics| CloudWatch
+
+    style TGW fill:#FF9900
+    style VGW fill:#FF9900
+    style VPN fill:#FF9900
+    style DirectConnect fill:#FF9900
+    style Storage_GW fill:#FF9900
+    style Prod_ALB fill:#FF9900
+    style Prod_RDS fill:#FF9900
+    style SSM fill:#FF9900

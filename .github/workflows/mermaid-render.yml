@@ -1,0 +1,74 @@
+name: Mermaid Render
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.md'
+      - '**/mermaid/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  mermaid:
+    name: Render Mermaid Diagrams
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g @mermaid-js/mermaid-cli@10.9.1
+          sudo apt-get update && sudo apt-get install -y chromium-browser
+
+      - name: Find and render Mermaid diagrams
+        run: |
+          # Create output directory for rendered diagrams
+          mkdir -p assets/diagrams
+
+          # Find all Mermaid diagrams in markdown files and extract them
+          find . -name "*.md" -not -path "./node_modules/*" -exec grep -l "\`\`\`mermaid" {} \; | while read -r file; do
+            echo "Processing: $file"
+            # Extract diagram blocks and render them
+            dir=$(dirname "$file")
+            filename=$(basename "$file" .md)
+
+            # Use mmdc to render if .mmd files exist
+            if ls "$dir"/"$filename"*.mmd 1> /dev/null 2>&1; then
+              for mmd in "$dir"/"$filename"*.mmd; do
+                output_name=$(basename "$mmd" .mmd)
+                mmdc -i "$mmd" -o "assets/diagrams/${output_name}.svg" -b transparent
+              done
+            fi
+          done
+
+      - name: Commit rendered diagrams
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain assets/diagrams/)" ]; then
+            git add assets/diagrams/
+            git commit -m "docs: update rendered mermaid diagrams [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Upload diagrams artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-diagrams
+          path: assets/diagrams/
+          if-no-files-found: ignore

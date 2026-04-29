@@ -1,0 +1,54 @@
+%% 3-Tier Architecture on AWS
+%% Author: AWS Guides
+%% Description: Classic web application architecture with web, application, and database tiers
+
+graph TB
+    subgraph "Edge Layer"
+        CF[CloudFront CDN]
+        R53[Route 53 DNS]
+    end
+
+    subgraph "VPC"
+        subgraph "Public Subnets"
+            ALB[Application Load Balancer]
+        end
+
+        subgraph "Private Application Subnets"
+            ASG[Auto Scaling Group<br/>EC2 Instances]
+        end
+
+        subgraph "Private Database Subnets"
+            RDS[(RDS Multi-AZ<br/>Primary)]
+          RDS_R[(RDS Multi-AZ<br/>Standby)]
+            ElastiCache[(ElastiCache<br/>Redis Cluster)]
+        end
+    end
+
+    subgraph "Storage"
+        S3[(S3 Bucket<br/>Static Assets)]
+    end
+
+    subgraph "Management & Security"
+        CW[CloudWatch]
+        IAM[IAM Roles]
+        SM[Secrets Manager]
+    end
+
+    Users -->|HTTPS| R53
+    R53 -->|DNS| CF
+    CF -->|Static Content| S3
+    CF -->|Dynamic Content| ALB
+    ALB -->|Load Balance| ASG
+    ASG -->|Read/Write| RDS
+    ASG -->|Cache| ElastiCache
+    ASG -.->|Credentials| SM
+    ASG -.->|Metrics| CW
+
+    RDS -.->|Replicate| RDS_R
+
+    style CF fill:#FF9900
+    style ALB fill:#FF9900
+    style ASG fill:#FF9900
+    style RDS fill:#FF9900
+    style S3 fill:#FF9900
+    style ElastiCache fill:#FF9900

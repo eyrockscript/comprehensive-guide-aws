@@ -1,0 +1,70 @@
+%% Disaster Recovery Strategies
+%% Author: AWS Guides
+%% Description: Comparison of DR strategies from backup to active-active
+
+graph TB
+    subgraph "Backup and Restore (RPO: 24h, RTO: 24h)"
+        BR_Primary[Primary Region<br/>Production]
+        BR_Backup[Backups to S3]
+        BR_S3[(S3/Glacier)]
+        BR_Region[Secondary Region<br/>Empty]
+
+        BR_Primary -->|Daily Backup| BR_Backup
+        BR_Backup -->|Store| BR_S3
+        BR_S3 -.->|Restore| BR_Region
+    end
+
+    subgraph "Pilot Light (RPO: 5min, RTO: 1h)"
+        PL_Primary[Primary Region<br/>Full Production]
+        PL_RDS[(RDS Primary)]
+        PL_Core[Secondary Region<br/>Core Only]
+        PL_RDS_Rep[(RDS Replica)]
+
+        PL_Primary --> PL_RDS
+        PL_RDS -.->|Replication| PL_RDS_Rep
+        PL_RDS_Rep --> PL_Core
+    end
+
+    subgraph "Warm Standby (RPO: 1min, RTO: 15min)"
+        WS_Primary[Primary Region<br/>Full Production]
+        WS_ASG[Auto Scaling<br/>10 instances]
+        WS_Standby[Secondary Region<br/>Reduced Capacity]
+        WS_ASG_Standby[Auto Scaling<br/>2 instances]
+
+        WS_Primary -->|Active| WS_ASG
+        WS_ASG -.->|Replication| WS_ASG_Standby
+        WS_ASG_Standby -->|Standby| WS_Standby
+    end
+
+    subgraph "Multi-Site Active-Active (RPO: 0, RTO: 0)"
+        AA_Region1[Region 1<br/>Active Production]
+        AA_Region2[Region 2<br/>Active Production]
+        AA_Global[(DynamoDB Global<br/>Route 53)]
+
+        AA_Region1 <-->|Bidirectional<br/>Replication| AA_Global
+        AA_Region2 <-->|Bidirectional<br/>Replication| AA_Global
+        AA_Region1 -.->|Health Checks| AA_Region2
+    end
+
+    subgraph "DR Orchestration"
+        Route53[Route 53<br/>DNS Failover]
+        HealthChecks[Health Checks]
+        Automation[Lambda/Step Functions<br/>Automation]
+    end
+
+    HealthChecks -->|Monitor| BR_Primary
+    HealthChecks -->|Monitor| PL_Primary
+    HealthChecks -->|Monitor| WS_Primary
+    HealthChecks -->|Monitor| AA_Region1
+
+    HealthChecks -->|Trigger| Route53
+    HealthChecks -->|Trigger| Automation
+
+    style BR_Primary fill:#FF9900
+    style PL_Primary fill:#FF9900
+    style WS_Primary fill:#FF9900
+    style AA_Region1 fill:#FF9900
+    style AA_Region2 fill:#FF9900
+    style BR_S3 fill:#FF9900
+    style PL_RDS fill:#FF9900
+    style Route53 fill:#FF9900

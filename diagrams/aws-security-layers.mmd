@@ -1,0 +1,112 @@
+%% AWS Security Layers
+%% Author: AWS Guides
+%% Description: Defense in depth security architecture for AWS
+
+graph TB
+    subgraph "Perimeter Security"
+        WAF[AWS WAF]
+        Shield[AWS Shield Advanced]
+        CF[CloudFront]
+        R53[Route 53]
+        Firewall_Manager[Firewall Manager]
+    end
+
+    subgraph "Network Security"
+        subgraph "VPC Layer"
+            NACL[NACLs]
+            SG[Security Groups]
+            FlowLogs[VPC Flow Logs]
+            Network_Firewall[Network Firewall]
+        end
+
+        subgraph "Connectivity"
+            VPN[Site-to-Site VPN]
+            DX[Direct Connect]
+            PrivateLink[PrivateLink]
+        end
+    end
+
+    subgraph "Identity & Access"
+        IAM[IAM]
+        STS[STS]
+        Cognito[Cognito]
+        AD[Directory Service]
+        Organizations[Organizations SCPs]
+    end
+
+    subgraph "Application Security"
+        Secrets[Secrets Manager]
+        ParamStore[Parameter Store]
+        ACM[ACM Certificates]
+        API_GW_WAF[API Gateway WAF]
+    end
+
+    subgraph "Data Security"
+        subgraph "Encryption"
+            KMS[(KMS)]
+            S3_Enc[S3 SSE]
+            EBS_Enc[EBS Encryption]
+            RDS_Enc[RDS Encryption]
+        end
+
+        subgraph "Data Protection"
+            Macie[Macie<br/>PII Discovery]
+            DLP[Data Loss Prevention]
+        end
+    end
+
+    subgraph "Detection & Response"
+        GuardDuty[GuardDuty<br/>Threat Detection]
+        SecurityHub[Security Hub]
+        Detective[Detective]
+        Inspector[Inspector]
+        CloudTrail[CloudTrail]
+        Config[Config]
+    end
+
+    subgraph "Compliance & Audit"
+        Artifact[Artifact]
+        AuditManager[Audit Manager]
+        Certificate_Manager[Certificate Manager]
+    end
+
+    Users -->|Request| R53
+    R53 -->|DNS| CF
+    CF -->|Filter| WAF
+    WAF -->|DDoS Protection| Shield
+    Shield -->|Terminate SSL| ACM
+    ACM -->|Forward| ALB[ALB]
+
+    ALB -->|Check| SG
+    SG -->|Check| NACL
+    NACL -->|Log| FlowLogs
+    NACL -->|Inspect| Network_Firewall
+
+    Users -.->|Auth| Cognito
+    Cognito -.->|Token| IAM
+    IAM -.->|Assume Role| STS
+    IAM -.->|SCP Check| Organizations
+
+    ALB -->|Fetch Secret| Secrets
+    Secrets -.->|Encrypt| KMS
+    S3_Enc -.->|Encrypt| KMS
+    EBS_Enc -.->|Encrypt| KMS
+    RDS_Enc -.->|Encrypt| KMS
+
+    Macie -->|Scan| S3_Enc
+
+    GuardDuty -.->|Findings| SecurityHub
+    Inspector -.->|Findings| SecurityHub
+    CloudTrail -.->|Events| Detective
+    Config -.->|Compliance| SecurityHub
+
+    SecurityHub -.->|Aggregate| AuditManager
+
+    style WAF fill:#FF9900
+    style Shield fill:#FF9900
+    style CF fill:#FF9900
+    style IAM fill:#FF9900
+    style KMS fill:#FF9900
+    style GuardDuty fill:#FF9900
+    style SecurityHub fill:#FF9900
+    style Secrets fill:#FF9900

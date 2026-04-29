@@ -126,6 +126,299 @@ La adopción efectiva de la nube requiere:
 - Adopción de metodologías ágiles
 - Cultura DevOps
 
+## Casos de Éxito en Migración a la Nube
+
+### Netflix: De Data Centers a AWS
+
+**Situación:** Netflix operaba su propia infraestructura en data centers, enfrentando limitaciones de escalabilidad y tiempos de aprovisionamiento prolongados.
+
+**Solución:** Migración completa a AWS aprovechando servicios como EC2, S3 y CloudFront.
+
+**Resultados:**
+- Capacidad de atender más de 230 millones de suscriptores globalmente
+- Despliegue de miles de instancias en minutos para picos de demanda
+- Reducción de costos operativos en un 70%
+- Mejora en disponibilidad del 99.99%
+
+**Factores Clave:**
+- Arquitectura de microservicios distribuidos
+- Uso extensivo de Auto Scaling
+- Implementación de multi-AZ y multi-región
+
+### Airbnb: Escalabilidad para Eventos de Alto Impacto
+
+**Situación:** Startup con crecimiento explosivo necesitaba infraestructura que pudiera escalar de 0 a millones de usuarios en horas.
+
+**Solución:** Arquitectura serverless-first con Lambda, API Gateway y DynamoDB.
+
+**Resultados:**
+- Capacidad de manejar tráfico 10x sin intervención manual
+- Reducción de tiempo de despliegue de semanas a minutos
+- Optimización de costos en un 60% vs infraestructura tradicional
+
+### Epic Games: Infraestructura para Gaming Global
+
+**Situación:** Lanzamiento de Fortnite requería infraestructura capaz de soportar millones de jugadores concurrentes.
+
+**Solución:** Uso de GameLift, DynamoDB Global Tables y CloudFront.
+
+**Resultados:**
+- Soporte para 125 millones de jugadores concurrentes
+- Latencia reducida a menos de 20ms para matchmaking
+- Escalado automático durante eventos especiales
+
+## Templates Seguros para Inicio de Proyectos
+
+### Template de VPC Base Segura
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VPC Base Segura para Proyectos AWS'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: Production
+    AllowedValues: [Development, Staging, Production]
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/([0-9]|[1-2][0-9]|3[0-2])$
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  # Subredes públicas con NAT Gateway
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Select [0, !Cidr [!Ref VpcCidr, 6, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [1, !Cidr [!Ref VpcCidr, 6, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+
+  # Subredes privadas para workloads
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Select [2, !Cidr [!Ref VpcCidr, 6, 8]]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Select [3, !Cidr [!Ref VpcCidr, 6, 8]]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
+
+  # Security Group base restrictivo
+  DefaultSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-base-sg
+      GroupDescription: Security Group base con acceso restringido
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS inbound
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: Allow all outbound
+
+Outputs:
+  VPCId:
+    Description: ID de la VPC creada
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${EnvironmentName}-VPCID
+
+  PrivateSubnets:
+    Description: Lista de subnets privadas
+    Value: !Join [',', [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]
+```
+
+### Template de IAM Roles Base
+
+```json
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Roles IAM base seguros",
+  "Resources": {
+    "EC2InstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {"Service": "ec2.amazonaws.com"},
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ],
+        "Policies": [{
+          "PolicyName": "S3LimitedAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+              ],
+              "Resource": "arn:aws:s3:::company-data-${AWS::AccountId}/*",
+              "Condition": {
+                "StringEquals": {
+                  "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+              }
+            }]
+          }
+        }]
+      }
+    }
+  }
+}
+```
+
+## Árbol de Decisiones: ¿Migrar a la Nube?
+
+```
+¿Tiene su organización necesidades de escalabilidad impredecibles?
+│
+├─ SÍ → La nube ofrece elasticidad automática sin inversión en capacidad ociosa
+│   │
+│   ├─ ¿Requiere despliegue global rápido?
+│   │   ├─ SÍ → AWS tiene 30+ regiones para despliegue en minutos
+│   │   └─ NO → Beneficios de escalabilidad local aún aplican
+│   │
+│   └─ ¿Tiene picos estacionales de tráfico?
+│       ├─ SÍ → Auto Scaling optimiza costos vs capacidad fija
+│       └─ NO → Elasticidad útil para crecimiento orgánico
+│
+├─ NO → Evaluar otros beneficios
+│   │
+│   ├─ ¿Busca reducir costos operativos?
+│   │   ├─ SÍ → Modelo pay-as-you-go elimina CAPEX
+│   │   └─ NO → Ver otros factores
+│   │
+│   ├─ ¿Necesita alta disponibilidad?
+│   │   ├─ SÍ → Multi-AZ y multi-región nativos
+│   │   └─ NO → Ver opciones single-region
+│   │
+│   └─ ¿Quiere acelerar innovación?
+│       ├─ SÍ + Necesita experimentación rápida
+│       │   ├─ SÍ → Servicios managed reducen time-to-market
+│       │   └─ NO → Beneficios de automatización e IaC
+│       └─ NO → Evaluar si on-premises sigue siendo viable
+│
+└─ ¿Tiene requisitos de soberanía de datos estrictos?
+    ├─ SÍ → Verificar disponibilidad de región local AWS
+    │   ├─ SÍ → AWS puede cumplir con regulaciones locales
+    │   └─ NO → Considerar modelos híbridos con Outposts
+    └─ NO → Migración viable sin restricciones adicionales
+```
+
+### Matriz de Decisión por Estrategia de Migración
+
+| Criterio | Rehost | Replatform | Refactor | Retire |
+|----------|--------|------------|----------|--------|
+| **Tiempo disponible** | < 3 meses | 3-6 meses | > 6 meses | Inmediato |
+| **Presupuesto** | Limitado | Moderado | Alto | N/A |
+| **Complejidad técnica** | Baja | Media | Alta | N/A |
+| **Valor a largo plazo** | Bajo | Medio | Alto | N/A |
+| **Requisitos de negocio** | Continuidad | Mejora | Transformación | Eliminación |
+
+## Calculadora de Costos de Migración
+
+### Factores de Costo a Considerar
+
+**Costos de Migración (Una vez):**
+- Análisis y planificación: $10,000 - $50,000
+- Ejecución de migración: $5,000 - $100,000+
+- Capacitación del equipo: $5,000 - $25,000
+- Optimización post-migración: $10,000 - $30,000
+
+**Ahorros Mensuales Estimados:**
+
+| Recurso | On-Premises/mes | AWS/mes | Ahorro |
+|---------|-----------------|---------|--------|
+| 10 servidores (medio) | $3,500 | $1,200 | $2,300 (66%) |
+| Almacenamiento 50TB | $2,000 | $1,150 | $850 (43%) |
+| Backup y DR | $1,500 | $300 | $1,200 (80%) |
+| Licenciamiento | $2,000 | $800 | $1,200 (60%) |
+| **Total** | **$9,000** | **$3,450** | **$5,550 (62%)** |
+
+### ROI Calculator Framework
+
+```
+ROI = (Beneficios - Costos de Migración) / Costos de Migración × 100
+
+Ejemplo:
+- Costo migración: $50,000
+- Ahorro mensual: $5,550
+- Payback period: $50,000 / $5,550 = 9 meses
+- ROI anual: ($5,550 × 12 - $50,000) / $50,000 × 100 = 33%
+```
+
+### Herramientas Recomendadas
+- **AWS Migration Evaluator:** Análisis gratuito de cargas existentes
+- **AWS Pricing Calculator:** Estimación de costos AWS
+- **TCO Calculator:** Comparación total costo de propiedad
+
 ## Conclusión
 
 AWS proporciona una plataforma robusta y versátil que permite a las organizaciones transformar sus operaciones de TI. Comprender estos fundamentos es el primer paso para aprovechar todo el potencial que ofrece la computación en la nube. A medida que las organizaciones avanzan en su viaje hacia la nube, los beneficios de agilidad, escalabilidad y optimización de costos se convierten en ventajas competitivas significativas en el panorama empresarial actual.

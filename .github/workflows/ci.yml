@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g markdownlint-cli@0.41.0
+          npm install -g markdown-link-check@3.12.2
+          npm install -g cspell@8.14.0
+
+      - name: Check directory structure
+        run: |
+          chmod +x scripts/check-structure.sh
+          ./scripts/check-structure.sh || true
+
+      - name: Run markdown lint
+        run: |
+          markdownlint "**/*.md" \
+            --ignore "node_modules/**" \
+            --config .markdownlint.json || true
+
+      - name: Run spell check
+        run: |
+          cspell "**/*.md" \
+            --config .cspell.json \
+            --no-progress || true
+
+      - name: Summary
+        run: |
+          echo "=================================="
+          echo "Validación completada"
+          echo "=================================="
+          echo "Revisa los logs anteriores para detalles."

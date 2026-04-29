@@ -1,0 +1,102 @@
+%% Microservices with Containers
+%% Author: AWS Guides
+%% Description: Microservices architecture using ECS/Fargate with service mesh
+
+graph TB
+    subgraph "Client Layer"
+        Web[Web Application]
+        Mobile[Mobile Apps]
+        Partner[Partner APIs]
+    end
+
+    subgraph "API Layer"
+        APIGW[API Gateway]
+        WAF[AWS WAF]
+    end
+
+    subgraph "VPC"
+        subgraph "Public Subnet"
+            ALB[Application<br/>Load Balancer]
+        end
+
+        subgraph "Private Subnets"
+            subgraph "ECS Cluster"
+                Service1[Service:<br/>User Service]
+                Service2[Service:<br/>Order Service]
+                Service3[Service:<br/>Inventory Service]
+                Service4[Service:<br/>Payment Service]
+            end
+
+            subgraph "Service Mesh"
+                AppMesh[AWS App Mesh<br/>Envoy Proxy]
+            end
+        end
+
+        subgraph "Data Layer"
+            RDS_Users[(RDS<br/>Users DB)]
+            RDS_Orders[(RDS<br/>Orders DB)]
+            DynamoDB_Inv[(DynamoDB<br/>Inventory)]
+            ElastiCache_Session[(ElastiCache<br/>Sessions)]
+        end
+    end
+
+    subgraph "External Services"
+        Stripe[Stripe API]
+        SendGrid[SendGrid]
+    end
+
+    subgraph "Observability"
+        CW[CloudWatch]
+        XRay[X-Ray]
+        CW_Alerts[CloudWatch Alarms]
+    end
+
+    Web -->|HTTPS| WAF
+    Mobile -->|HTTPS| WAF
+    Partner -->|API Key| WAF
+    WAF -->|Route| APIGW
+
+    APIGW -->|/users/*| ALB
+    APIGW -->|/orders/*| ALB
+    APIGW -->|/inventory/*| ALB
+    APIGW -->|/payments/*| ALB
+
+    ALB -->|Target Group| Service1
+    ALB -->|Target Group| Service2
+    ALB -->|Target Group| Service3
+    ALB -->|Target Group| Service4
+
+    Service1 -->|mTLS| AppMesh
+    Service2 -->|mTLS| AppMesh
+    Service3 -->|mTLS| AppMesh
+    Service4 -->|mTLS| AppMesh
+
+    Service1 -->|Read/Write| RDS_Users
+    Service2 -->|Read/Write| RDS_Orders
+    Service2 -->|Async| Service4
+    Service3 -->|Read/Write| DynamoDB_Inv
+    Service4 -->|API Call| Stripe
+    Service4 -->|Notify| SendGrid
+
+    Service1 -.->|Cache| ElastiCache_Session
+    Service2 -.->|Cache| ElastiCache_Session
+
+    Service1 -.->|Metrics| CW
+    Service2 -.->|Metrics| CW
+    Service3 -.->|Metrics| CW
+    Service4 -.->|Metrics| CW
+
+    Service1 -.->|Traces| XRay
+    Service2 -.->|Traces| XRay
+    Service3 -.->|Traces| XRay
+    Service4 -.->|Traces| XRay
+
+    CW -.->|Alerts| CW_Alerts
+
+    style APIGW fill:#FF9900
+    style Service1 fill:#FF9900
+    style Service2 fill:#FF9900
+    style Service3 fill:#FF9900
+    style Service4 fill:#FF9900
+    style DynamoDB_Inv fill:#FF9900
+    style ElastiCache_Session fill:#FF9900

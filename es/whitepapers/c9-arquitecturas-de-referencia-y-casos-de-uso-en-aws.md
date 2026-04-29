@@ -832,6 +832,785 @@ Para implementar con éxito las arquitecturas de referencia:
 - **AWS Solutions Constructs:** Patrones de arquitectura pre-definidos
 - **AWS Solutions Library:** Soluciones completas para casos de uso comunes
 
+## Casos de Éxito Reales de Arquitecturas AWS
+
+### Netflix: Arquitectura de Streaming Global
+
+**Contexto:** Servir 230+ millones de usuarios con contenido de alta calidad, con latencia mínima y disponibilidad del 99.99%.
+
+**Arquitectura Implementada:**
+- **CDN Global:** CloudFront con 450+ PoPs distribuidos estratégicamente
+- **Microservicios:** Más de 1,000 microservicios en contenedores
+- **Data:** Cassandra, EVCache, S3 para diferentes capas de datos
+- **Compute:** EC2 Auto Scaling Groups con Spot Instances
+- **Orchestration:** Plataforma de orquestación propia (converging to Kubernetes)
+
+**Resultados Clave:**
+- Tiempo de inicio de video reducido a menos de 2 segundos
+- Capacidad de manejar picos de 37% del tráfico de internet en horas pico
+- Despliegues 1,000+ veces por día sin downtime
+- Resiliencia ante fallos de región completa
+
+**Lecciones:** El desacoplamiento completo permite evolución independiente de servicios.
+
+### Airbnb: Plataforma de Marketplace Escalable
+
+**Contexto:** Marketplace de alojamientos que debe escalar de 0 a millones de búsquedas durante eventos (como Super Bowl).
+
+**Arquitectura:**
+- **Búsqueda:** Elasticsearch en EC2 con auto-scaling
+- **Booking:** Servicios event-driven con SQS y SNS
+- **Pagos:** Aislamiento PCI DSS con microservicios dedicados
+- **ML:** SageMaker para precios dinámicos y recomendaciones
+- **Data:** Airbnb data platform sobre EMR y S3
+
+**Resultados:**
+- Escalado 10x en horas sin intervención manual
+- 99.95% uptime durante eventos de alto tráfico
+- Reducción de 60% en costos con Spot Instances
+
+### Epic Games (Fortnite): Gaming Masivo
+
+**Contexto:** Soportar 125 millones de jugadores concurrentes, con matchmaking en tiempo real y persistencia de estado.
+
+**Arquitectura:**
+- **Game Servers:** GameLift con auto-scaling
+- **Estado:** DynamoDB Global Tables para persistencia multi-región
+- **Caché:** ElastiCache Redis para estado de sesión
+- **Matchmaking:** DynamoDB + Lambda para baja latencia
+- **Social:** RDS para datos relacionales
+
+**Resultados:**
+- Matchmaking en menos de 20ms
+- Eventos de hasta 15 millones de jugadores simultáneos
+- Escalado automático durante eventos especiales
+
+### Lyft: Arquitectura de Rideshare en Tiempo Real
+
+**Contexto:** Coordinar millones de viajes diarios con matching conductor-pasajero en tiempo real.
+
+**Arquitectura:**
+- **Matching:** Sistema de event streaming con Kinesis
+- **Location:** DynamoDB para datos de ubicación en tiempo real
+- **Dispatch:** Lambda + API Gateway para dispatching
+- **Analytics:** Redshift para análisis de rutas y demanda
+- **ML:** SageMaker para estimación de tiempos y precios
+
+**Resultados:**
+- Matching en menos de 1 segundo
+- Procesamiento de 10,000+ eventos/segundo
+- Disponibilidad 99.99%
+
+## Templates de Arquitectura Segura
+
+### Template: Arquitectura Web Multi-Tier Segura (CloudFormation)
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Arquitectura Web de 3 Niveles Alta Disponibilidad y Seguridad'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: Production
+    AllowedValues: [Development, Staging, Production]
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Key pair para instancias
+
+Mappings:
+  AWSRegionAMI:
+    us-east-1:
+      AMI: ami-12345678
+    us-west-2:
+      AMI: ami-87654321
+
+Resources:
+  # VPC Multi-AZ
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Ref Environment
+
+  # Subnets públicas para ALB
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-1a
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-1b
+
+  # Subnets privadas para aplicaciones
+  PrivateAppSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-App-1a
+
+  PrivateAppSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-App-1b
+
+  # Subnets privadas para datos
+  PrivateDataSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.5.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-Data-1a
+
+  PrivateDataSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.6.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-Data-1b
+
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref Environment
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # NAT Gateways para outbound de subnets privadas
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet2
+
+  # Route Tables
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-RT
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-RT-1
+
+  PrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  # Application Load Balancer
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${Environment}-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      IpAddressType: ipv4
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group para ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  ALBListenerHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS-1-2-2017-01
+      Certificates:
+        - CertificateArn: !Ref Certificate
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WebTargetGroup
+
+  WebTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${Environment}-web-tg
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: instance
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub '*.${Environment}.example.com'
+      ValidationMethod: DNS
+
+  # Auto Scaling Group para tier web
+  WebLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${Environment}-web-template
+      LaunchTemplateData:
+        ImageId: !FindInMap [AWSRegionAMI, !Ref 'AWS::Region', AMI]
+        InstanceType: t3.medium
+        KeyName: !Ref KeyPair
+        SecurityGroupIds:
+          - !Ref WebSecurityGroup
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            yum update -y
+            yum install -y httpd
+            systemctl start httpd
+            systemctl enable httpd
+            echo "<h1>Hello from $(hostname)</h1>" > /var/www/html/index.html
+
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group para instancias web
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 10.0.0.0/8
+
+  WebAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Sub ${Environment}-web-asg
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WebLaunchTemplate
+        Version: !GetAtt WebLaunchTemplate.LatestVersionNumber
+      MinSize: 2
+      MaxSize: 10
+      DesiredCapacity: 2
+      VPCZoneIdentifier:
+        - !Ref PrivateAppSubnet1
+        - !Ref PrivateAppSubnet2
+      TargetGroupARNs:
+        - !Ref WebTargetGroup
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+
+  # RDS Multi-AZ
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group para RDS
+      SubnetIds:
+        - !Ref PrivateDataSubnet1
+        - !Ref PrivateDataSubnet2
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group para RDS
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebSecurityGroup
+
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub ${Environment}-db
+      DBName: webappdb
+      Engine: mysql
+      EngineVersion: '8.0'
+      DBInstanceClass: db.t3.medium
+      AllocatedStorage: 20
+      StorageType: gp3
+      MultiAZ: true
+      MasterUsername: admin
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DBSecret}:SecretString:password}}'
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DBSecurityGroup
+      BackupRetentionPeriod: 7
+      DeletionProtection: true
+
+  DBSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${Environment}/db/password
+      GenerateSecretString:
+        SecretStringTemplate: '{"username":"admin"}'
+        GenerateStringKey: password
+        PasswordLength: 16
+        ExcludeCharacters: '"@/\'
+
+Outputs:
+  ALBEndpoint:
+    Description: Endpoint del Application Load Balancer
+    Value: !GetAtt ALB.DNSName
+  VPCId:
+    Description: ID de la VPC
+    Value: !Ref VPC
+```
+
+### Template: Arquitectura Serverless Event-Driven (Terraform)
+
+```hcl
+# main.tf - Arquitectura Serverless Segura
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+# Variables
+variable "environment" {
+  description = "Environment name"
+  type        = string
+}
+
+variable "project" {
+  description = "Project name"
+  type        = string
+}
+
+# API Gateway
+resource "aws_api_gateway_rest_api" "api" {
+  name = "${var.project}-${var.environment}-api"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+# Lambda Function
+resource "aws_lambda_function" "api_handler" {
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  function_name    = "${var.project}-${var.environment}-handler"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs18.x"
+  timeout         = 30
+  memory_size     = 256
+
+  environment {
+    variables = {
+      ENVIRONMENT = var.environment
+      TABLE_NAME  = aws_dynamodb_table.data_table.name
+    }
+  }
+
+  vpc_config {
+    subnet_ids         = aws_subnet.private[*].id
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+}
+
+# IAM Role para Lambda
+resource "aws_iam_role" "lambda_role" {
+  name = "${var.project}-${var.environment}-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "${var.project}-${var.environment}-lambda-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = aws_dynamodb_table.data_table.arn
+      }
+    ]
+  })
+}
+
+# DynamoDB Table
+resource "aws_dynamodb_table" "data_table" {
+  name         = "${var.project}-${var.environment}-data"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  server_side_encryption {
+    enabled = true
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# SQS Queue para procesamiento asíncrono
+resource "aws_sqs_queue" "processing_queue" {
+  name                      = "${var.project}-${var.environment}-queue"
+  delay_seconds             = 0
+  max_message_size          = 262144
+  message_retention_seconds = 345600
+  receive_wait_time_seconds = 10
+
+  kms_master_key_id = "alias/aws/sqs"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# EventBridge Rule
+resource "aws_cloudwatch_event_rule" "scheduled_rule" {
+  name                = "${var.project}-${var.environment}-schedule"
+  description         = "Trigger Lambda on schedule"
+  schedule_expression = "rate(5 minutes)"
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.scheduled_rule.name
+  target_id = "LambdaFunction"
+  arn       = aws_lambda_function.api_handler.arn
+}
+
+# Outputs
+output "api_endpoint" {
+  description = "API Gateway endpoint"
+  value       = aws_api_gateway_deployment.api.invoke_url
+}
+
+output "lambda_function_name" {
+  description = "Lambda function name"
+  value       = aws_lambda_function.api_handler.function_name
+}
+```
+
+## Árbol de Decisiones: Selección de Arquitectura
+
+```
+¿Cuál es el patrón de carga de trabajo principal?
+│
+├─ Tráfico web/aplicación con usuarios concurrentes
+│   │
+│   ├─ ¿Necesita escalado automático?
+│   │   ├─ SÍ → Arquitectura de 3 niveles con Auto Scaling
+│   │   │   │
+│   │   │   ├─ ¿Tiene componentes stateful?
+│   │   │   │   ├─ SÍ → Session affinity + ElastiCache
+│   │   │   │   └─ NO → Stateless ideal, ELB round-robin
+│   │   │   │
+│   │   │   └─ ¿Requiere alta disponibilidad (99.99%+)?
+│   │   │       ├─ SÍ → Multi-AZ + Multi-Region failover
+│   │   │       └─ NO → Multi-AZ suficiente
+│   │   │
+│   │   └─ NO → Arquitectura de 2 niveles (desarrollo/piloto)
+│   │
+│   ├─ ¿Es carga de trabajo variable/impredecible?
+│   │   ├─ SÍ → Arquitectura Serverless (Lambda + API Gateway)
+│   │   │   │
+│   │   │   ├─ ¿Tiene requisitos de latencia muy baja (<10ms)?
+│   │   │   │   ├─ SÍ → Considerar EC2 con provisioned capacity
+│   │   │   │   └─ NO → Lambda es adecuado
+│   │   │   │
+│   │   │   └─ ¿Requiere ejecución > 15 min?
+│   │   │       ├─ SÍ → Fargate o EC2
+│   │   │       └─ NO → Lambda + Step Functions para orquestación
+│   │   │
+│   │   └─ NO → Contenedores con ECS/EKS para consistencia
+│   │
+│   └─ ¿Es aplicación legacy monolítica?
+│       ├─ SÍ → Rehost en EC2 → gradualmente microservicios
+│       └─ NO → Cloud-native desde el inicio
+│
+├─ Procesamiento de datos/análisis
+│   │
+│   ├─ ¿Es análisis en tiempo real?
+│   │   ├─ SÍ → Kinesis + Lambda/Flink + ElastiCache/DynamoDB
+│   │   │   │
+│   │   │   ├─ ¿Volumen > 1TB/día?
+│   │   │   │   ├─ SÍ → Kinesis Data Streams + EMR/Spark
+│   │   │   │   └─ NO → Kinesis Data Analytics
+│   │   │   │
+│   │   │   └─ ¿Latencia crítica (<100ms)?
+│   │   │       ├─ SÍ → Kinesis + ElastiCache
+│   │   │       └─ NO → Kinesis + Lambda suficiente
+│   │   │
+│   │   └─ NO → Batch processing con Step Functions + EMR/Glue
+│   │
+│   ├─ ¿Necesita data warehouse?
+│   │   ├─ SÍ → Redshift para análisis estructurado
+│   │   │   │
+│   │   │   ├─ ¿Datos > 100TB?
+│   │   │   │   ├─ SÍ → RA3 nodes con managed storage
+│   │   │   │   └─ NO → DC2 o DS2 nodes
+│   │   │   │
+│   │   │   └─ ¿Consultas frecuentes sobre datos en S3?
+│   │   │       ├─ SÍ → Redshift Spectrum
+│   │   │       └─ NO → Redshift nativo
+│   │   │
+│   │   └─ NO → Data Lake con S3 + Athena
+│   │
+│   └─ ¿Necesita ML/IA?
+│       ├─ SÍ → SageMaker para entrenamiento e inferencia
+│       │   │
+│       │   ├─ ¿Modelos pre-entrenados suficientes?
+│       │   │   ├─ SÍ → Amazon Bedrock
+│       │   │   └─ NO → SageMaker custom training
+│       │   │
+│       │   └─ ¿Inferencia en tiempo real con alta demanda?
+│       │       ├─ SÍ → SageMaker Endpoints con Auto Scaling
+│       │       └─ NO → SageMaker Serverless Inference
+│       │
+│       └─ NO → Glue + Athena para análisis tradicional
+│
+└─ Comunicación/Integración entre sistemas
+    │
+    ├─ ¿Es comunicación asíncrona?
+    │   ├─ SÍ → SQS para colas o SNS para pub/sub
+    │   │   │
+    │   │   ├─ ¿Necesita garantía de entrega exactamente-una-vez?
+    │   │   │   ├─ SÍ → SQS FIFO
+    │   │   │   └─ NO → SQS Standard
+    │   │   │
+    │   │   └─ ¿Múltiples consumidores?
+    │   │       ├─ SÍ → SNS + SQS fan-out
+    │   │       └─ NO → SQS directo
+    │   │
+    │   └─ NO → EventBridge para event-driven
+    │
+    ├─ ¿Es orquestación de procesos?
+    │   ├─ SÍ → Step Functions para workflows
+    │   │   │
+    │   │   ├─ ¿Workflow largo (> 1 año)?
+    │   │   │   ├─ SÍ → Step Functions Standard
+    │   │   │   └─ NO → Step Functions Express
+    │   │   │
+    │   │   └─ ¿Necesita integración con servicios externos?
+    │   │       ├─ SÍ → Callback patterns
+    │   │       └─ NO → Native service integration
+    │   │
+    │   └─ NO → Lambda direct invocation
+    │
+    └─ ¿Es API para consumo externo?
+        ├─ SÍ → API Gateway
+        │   │
+        │   ├─ ¿Necesita WebSocket?
+        │   │   ├─ SÍ → API Gateway WebSocket API
+        │   │   └─ NO → REST API o HTTP API
+        │   │
+        │   └─ ¿Requiere throttling avanzado?
+        │       ├─ SÍ → API Gateway REST con usage plans
+        │       └─ NO → HTTP API (más económico)
+        │
+        └─ NO → ALB/NLB para internal APIs
+```
+
+### Matriz Comparativa de Arquitecturas
+
+| Criterio | 3-Tier EC2 | Serverless | Containerizada | Data Lake |
+|----------|------------|------------|----------------|-----------|
+| **Costo (baja carga)** | Alto | Bajo | Medio | Medio |
+| **Costo (alta carga)** | Medio | Alto | Bajo | Bajo |
+| **Escalado** | Manual/Auto | Automático | Automático | Automático |
+| **Time to Market** | Medio | Rápido | Medio | Medio |
+| **Control** | Alto | Bajo | Alto | Medio |
+| **Vendor Lock-in** | Bajo | Alto | Medio | Alto |
+| **Complejidad Ops** | Alta | Baja | Media | Media |
+
+## Calculadora Comparativa de Costos por Arquitectura
+
+### Escenario: Aplicación Web con 1,000 usuarios concurrentes
+
+**Arquitectura 3-Tier (EC2):**
+```
+2 ALB: $32.40/mes
+4 EC2 t3.medium (web): $161.28/mes
+2 EC2 t3.large (app): $161.28/mes
+1 RDS db.t3.medium Multi-AZ: $122.64/mes
+100GB EBS: $10.00/mes
+Data Transfer: $45.00/mes
+TOTAL: $532.60/mes
+```
+
+**Arquitectura Serverless:**
+```
+API Gateway: 100M requests: $350.00/mes
+Lambda: 10M invocaciones, 512MB, 200ms avg: $104.17/mes
+DynamoDB on-demand: 10M reads, 5M writes: $75.00/mes
+CloudFront: 100GB: $8.50/mes
+S3: 500GB: $11.50/mes
+TOTAL: $549.17/mes
+```
+
+**Arquitectura Containerizada (ECS Fargate):**
+```
+ECS Fargate: 4 tasks x 0.5 vCPU, 1GB RAM: $115.20/mes
+ALB: $16.20/mes
+Aurora Serverless: 2 ACU avg: $350.00/mes
+CloudFront: $8.50/mes
+ElastiCache: cache.t3.micro: $12.41/mes
+TOTAL: $502.31/mes
+```
+
+### Comparación por Escenario de Carga
+
+| Métrica | EC2 | Serverless | Containers |
+|---------|-----|------------|------------|
+| **1,000 usuarios** | $533/mes | $549/mes | $502/mes |
+| **10,000 usuarios** | $1,200/mes | $1,800/mes | $1,100/mes |
+| **100,000 usuarios** | $5,500/mes | $12,000/mes | $4,800/mes |
+| **Escalado a 0** | No | $50/mes (base) | No |
+
+### Recomendaciones por Caso de Uso
+
+| Caso de Uso | Arquitectura Recomendada | Por qué |
+|-------------|--------------------------|---------|
+| Startup MVP | Serverless | Time to market, pago por uso |
+| E-commerce estable | Containerizada | Balance costo/control |
+| Enterprise legacy | 3-Tier EC2 | Control total, migración gradual |
+| Data Analytics | Data Lake | Optimizado para big data |
+| IoT/Real-time | Event-driven serverless | Escalado automático extremo |
+| Gaming multiplayer | EC2 + GameLift | Latencia ultra-baja |
+
 ## Estudios de Caso
 
 ### Migración de Aplicación Monolítica a Microservicios

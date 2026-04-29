@@ -1,0 +1,76 @@
+%% Serverless Event-Driven Architecture
+%% Author: AWS Guides
+%% Description: Event-driven serverless architecture using Lambda, SQS, SNS, and DynamoDB
+
+graph LR
+    subgraph "Event Sources"
+        API[API Gateway]
+        S3_Event[S3 Events]
+        CW_Events[CloudWatch Events]
+        IoT[IoT Core]
+    end
+
+    subgraph "Event Bus"
+        EB[EventBridge]
+    end
+
+    subgraph "Processing Layer"
+        Lambda1[Lambda:<br/>Validation]
+        Lambda2[Lambda:<br/>Transform]
+        Lambda3[Lambda:<br/>Notification]
+        StepFunctions[Step Functions<br/>Orchestration]
+    end
+
+    subgraph "Message Queue"
+        SQS[(SQS Queue)]
+        SNS[(SNS Topic)]
+        DLQ[(Dead Letter Queue)]
+    end
+
+    subgraph "Data Stores"
+        DynamoDB[(DynamoDB)]
+        S3_Data[(S3 Data Lake)]
+    end
+
+    subgraph "Monitoring"
+        CW_Logs[CloudWatch Logs]
+        XRay[X-Ray Tracing]
+    end
+
+    API -->|REST API| Lambda1
+    S3_Event -->|Object Created| EB
+    CW_Events -->|Scheduled| EB
+    IoT -->|MQTT Messages| IoT_Rule[IoT Rule]
+    IoT_Rule -->|Invoke| Lambda2
+
+    EB -->|Route Events| Lambda1
+    EB -->|Route Events| Lambda2
+    EB -->|Route Events| SNS
+
+    Lambda1 -->|Valid Events| SQS
+    Lambda1 -->|Invalid Events| DLQ
+    Lambda2 -->|Transform| StepFunctions
+
+    SQS -->|Process| Lambda3
+    SNS -->|Fan-out| Lambda3
+    SNS -->|Fan-out| SQS
+
+    Lambda3 -->|Store| DynamoDB
+    Lambda3 -->|Archive| S3_Data
+    StepFunctions -->|Store| DynamoDB
+
+    Lambda1 -.->|Logs| CW_Logs
+    Lambda2 -.->|Logs| CW_Logs
+    Lambda3 -.->|Logs| CW_Logs
+    Lambda1 -.->|Traces| XRay
+    Lambda2 -.->|Traces| XRay
+    Lambda3 -.->|Traces| XRay
+
+    style API fill:#FF9900
+    style Lambda1 fill:#FF9900
+    style Lambda2 fill:#FF9900
+    style Lambda3 fill:#FF9900
+    style DynamoDB fill:#FF9900
+    style SQS fill:#FF9900
+    style SNS fill:#FF9900
+    style StepFunctions fill:#FF9900
