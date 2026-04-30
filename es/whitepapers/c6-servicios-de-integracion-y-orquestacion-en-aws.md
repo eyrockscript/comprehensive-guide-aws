@@ -1,472 +1,1560 @@
 # Capítulo 6: Servicios de Integración y Orquestación en AWS
 
-## Resumen Ejecutivo
-
-En el ecosistema moderno de aplicaciones distribuidas, la capacidad de integrar servicios y orquestar flujos de trabajo complejos se ha convertido en un componente crítico para las arquitecturas en la nube. Amazon Web Services (AWS) ofrece un conjunto robusto de servicios de integración y orquestación que permiten a las organizaciones conectar aplicaciones, sincronizar datos y automatizar procesos de negocio. Este whitepaper explora en profundidad los principales servicios de integración y orquestación de AWS, sus características, casos de uso y consideraciones para implementación. Comprender estas capacidades es fundamental para construir arquitecturas flexibles, resilientes y desacopladas que puedan evolucionar con las necesidades cambiantes del negocio.
-
-## Amazon API Gateway
-
-Amazon API Gateway es un servicio completamente gestionado que facilita la creación, publicación, mantenimiento, monitoreo y protección de APIs a cualquier escala.
-
-### Características Principales
-
-- **Tipos de APIs:**
-  - REST APIs: Modelo basado en recursos con características completas
-  - HTTP APIs: Optimizadas para rendimiento y costo
-  - WebSocket APIs: Para comunicación bidireccional en tiempo real
-
-- **Gestión completa del ciclo de vida:**
-  - Creación y documentación
-  - Control de versiones
-  - Etapas de despliegue (dev, test, prod)
-  - Gestión de cambios
-
-- **Seguridad robusta:**
-  - Autenticación (IAM, Cognito, Lambda Authorizers)
-  - Throttling y cuotas
-  - Integración con AWS WAF
-  - Cifrado en tránsito
-
-- **Rendimiento y escalabilidad:**
-  - Caché integrada
-  - Escalado automático
-  - CloudFront integration para distribución global
-  - Alta disponibilidad multi-AZ
-
-### Integraciones
-
-- **Lambda:** Ejecución de código sin servidor
-- **HTTP:** Conexión con endpoints HTTP/HTTPS
-- **Servicios AWS:** Integración directa con servicios como DynamoDB, SQS, etc.
-- **Mock:** Respuestas simuladas para desarrollo y pruebas
-- **Private integrations:** Acceso a servicios dentro de una VPC
-
-### Casos de Uso
-
-- **APIs públicas:** Exposición de funcionalidades a desarrolladores externos
-- **Backends para aplicaciones móviles/web:** Comunicación cliente-servidor
-- **Integración de microservicios:** Comunicación entre servicios internos
-- **Proxies para APIs legacy:** Modernización de interfaces existentes
-- **Ingesta de datos IoT:** Puntos de entrada para dispositivos conectados
-
-### Mejores Prácticas
-
-- Implementación de autorización adecuada
-- Configuración de límites de tasa (throttling)
-- Habilitación de caché para mejorar latencia
-- Monitoreo y logging completo
-- Implementación de validación de solicitudes
-- Uso de mapeos de solicitud/respuesta
-
-## Amazon EventBridge
-
-EventBridge (anteriormente CloudWatch Events) es un bus de eventos sin servidor que facilita la conexión de aplicaciones utilizando datos en tiempo real.
-
-### Componentes Principales
-
-- **Event buses:** Canales para eventos
-  - Default bus (eventos de servicios AWS)
-  - Custom buses (eventos personalizados)
-  - Partner event buses (SaaS de terceros)
-
-- **Rules:** Patrones de coincidencia para eventos
-- **Targets:** Destinos que reciben eventos que coinciden con reglas
-- **Schemas:** Definición de estructura para eventos
-
-### Características
-
-- **Procesamiento en tiempo real**
-- **Capacidad de filtrado avanzado**
-- **Enrutamiento basado en contenido**
-- **Transformación de eventos**
-- **Archivo y reproducción**
-- **Esquemas de eventos y detección**
-
-### Integraciones
-
-- Más de 20 servicios AWS como targets
-- Aplicaciones SaaS de terceros
-- Integración con API Destinations para endpoints HTTP
-
-### Casos de Uso
-
-- **Arquitectura basada en eventos:** Comunicación desacoplada entre servicios
-- **Monitoreo y respuesta operacional:** Reacción a cambios de estado
-- **Automatización de procesos:** Ejecución de acciones basadas en eventos
-- **Aplicaciones SaaS B2B:** Integración con sistemas externos
-- **Extensión de servicios AWS:** Reacción a eventos del servicio
-
-### Diferencias con SNS y SQS
-
-- **EventBridge:** Enrutamiento basado en contenido, orientado a eventos
-- **SNS:** Mensajería pub/sub para notificaciones
-- **SQS:** Colas para desacoplar componentes
-
-## AWS Step Functions
-
-Step Functions es un servicio de orquestación que permite coordinar múltiples servicios AWS en flujos de trabajo visuales.
-
-### Componentes Clave
-
-- **State Machines:** Definición de flujos de trabajo
-- **States:** Pasos individuales en el flujo de trabajo
-  - Task, Choice, Wait, Parallel, Map, etc.
-- **Transitions:** Conexiones entre estados
-- **Executions:** Instancias en ejecución del flujo de trabajo
-
-### Tipos de Integración
-
-- **AWS SDK Integrations:** Conexión directa con servicios AWS
-- **Optimized Integrations:** Conexiones optimizadas para servicios específicos
-- **HTTP Tasks:** Conexión con APIs externas
-
-### Tipos de Flujos de Trabajo
-
-- **Standard:** Ejecuciones de larga duración (hasta 1 año)
-- **Express:** Procesamiento de alto volumen, corta duración
-  - **Synchronous:** Resultados inmediatos
-  - **Asynchronous:** Procesamiento en segundo plano
-
-### Características Principales
-
-- **Representación visual:** Diseño y monitoreo gráfico
-- **Gestión de errores:** Reintentos, fallbacks, catch
-- **Capacidades de bifurcación y unión:** Ejecución paralela y condicional
-- **Historial de ejecución:** Seguimiento detallado
-- **Integración con X-Ray:** Trazabilidad y análisis
-
-### Casos de Uso
-
-- **Procesamiento de datos:** Pipelines ETL
-- **Microservicios:** Orquestación de funciones serverless
-- **Procesos de negocio:** Automatización de workflows empresariales
-- **Machine Learning:** Flujos de ML desde entrenamiento hasta inferencia
-- **Aprobaciones humanas:** Flujos con intervención manual
-
-## Amazon SQS (Simple Queue Service)
-
-SQS es un servicio de colas de mensajes completamente gestionado que permite desacoplar y escalar microservicios, sistemas distribuidos y aplicaciones serverless.
-
-### Tipos de Colas
-
-- **Standard Queues:** Al menos una entrega, sin orden garantizada
-- **FIFO Queues:** Entrega exactamente una vez, orden preservada
-
-### Características Principales
-
-- **Durabilidad y disponibilidad:** Replicación en múltiples AZs
-- **Escalabilidad casi ilimitada**
-- **Seguridad:** Cifrado en reposo y en tránsito, IAM
-- **Mensajes de gran tamaño:** Hasta 256KB (con Extended Client Library hasta 2GB)
-- **Retención configurable:** Hasta 14 días
-- **Recepción y eliminación en lote**
-- **Destino de mensajes fallidos (DLQ)**
-
-### Patrones de Integración
-
-- **Worker pools:** Procesamiento distribuido
-- **Buffering y throttling:** Gestión de picos de carga
-- **Request-response:** Modelos asíncronos
-- **Estado de aplicación:** Tracking de progreso
-- **Integración con servicios AWS**
-
-### Mejores Prácticas
-
-- Implementación de backoff para polling
-- Configuración adecuada de visibilidad timeout
-- Uso de DLQ para mensajes problemáticos
-- Gestión adecuada de idempotencia para reintentos
-- Batch operations para rendimiento óptimo
-
-## Amazon SNS (Simple Notification Service)
-
-SNS es un servicio de mensajería pub/sub completamente gestionado para microservicios, sistemas distribuidos y aplicaciones serverless.
-
-### Conceptos Clave
-
-- **Topics:** Canales de comunicación
-- **Subscriptions:** Destinos para mensajes
-- **Publishers:** Productores de mensajes
-- **Message filtering:** Filtrado basado en atributos
-
-### Tipos de Suscripciones
-
-- **Application-to-Application (A2A):**
-  - AWS Lambda
-  - SQS
-  - HTTP/S
-  - Firehose
-  - EventBridge
-
-- **Application-to-Person (A2P):**
-  - Email
-  - SMS
-  - Mobile push
-  - ChatBot (Slack, Microsoft Teams)
-
-### Características Principales
-
-- **Fan-out pattern:** Entrega a múltiples suscriptores
-- **Message filtering:** Enrutamiento basado en atributos
-- **Mensajes de gran tamaño:** Hasta 256KB
-- **Archivado y replay**
-- **Message data protection:** Protección de datos sensibles
-- **FIFO Topics:** Ordenamiento garantizado
-- **Message deduplication**
-
-### Casos de Uso
-
-- **Alertas y notificaciones:** Eventos operacionales críticos
-- **Aplicaciones de monitoreo:** Respuesta a eventos
-- **Flujos de trabajo Push-to-Pull:** SNS + SQS
-- **Notificaciones a usuarios finales:** Mensajes multicanal
-- **Architecturas basadas en eventos:** Publicación de cambios de estado
-
-## Amazon MQ
-
-Amazon MQ es un servicio gestionado de broker de mensajes que facilita la migración a la nube de aplicaciones que utilizan protocolos de mensajería tradicionales.
-
-### Características Clave
-
-- **Compatibilidad con protocolos estándar:**
-  - JMS
-  - NMS
-  - AMQP
-  - STOMP
-  - MQTT
-  - WebSocket
-
-- **Motores soportados:**
-  - Apache ActiveMQ
-  - RabbitMQ
-
-- **Despliegue:**
-  - Single-instance broker
-  - Active/standby deployment para alta disponibilidad
-
-- **Seguridad:**
-  - Cifrado en reposo y en tránsito
-  - Autenticación y autorización
-  - Integración con VPC
-
-### Casos de Uso
-
-- **Migración lift-and-shift:** Mover aplicaciones existentes a la nube
-- **Sistemas legados:** Integración con software que utiliza protocolos tradicionales
-- **Patrones avanzados de mensajería:**
-  - Request-reply
-  - Publish-subscribe
-  - Point-to-point queuing
-
-### Cuándo Usar MQ vs. SNS/SQS
-
-- **Amazon MQ:** Cuando se requiere compatibilidad con protocolos estándar
-- **SNS/SQS:** Para nuevas aplicaciones nativas de la nube o cuando la estricta compatibilidad de API no es necesaria
-
-## AWS AppSync
-
-AppSync es un servicio gestionado que utiliza GraphQL para facilitar el desarrollo de APIs para aplicaciones que requieren datos en tiempo real y acceso a múltiples fuentes de datos.
-
-### Características Principales
-
-- **GraphQL APIs:** Lenguaje de consulta flexible
-- **Resolvers:** Conexión a fuentes de datos
-- **Subscriptions:** Actualizaciones en tiempo real
-- **Conflictos y sincronización offline**
-- **Fine-grained access control**
-- **Caching:** Mejora de rendimiento
-
-### Fuentes de Datos Soportadas
-
-- AWS Lambda
-- DynamoDB
-- Aurora
-- ElasticSearch
-- HTTP endpoints
-- OpenSearch
-
-### Casos de Uso
-
-- **Aplicaciones móviles/web en tiempo real**
-- **Colaboración en tiempo real**
-- **Dashboards en vivo**
-- **Análisis de datos interactivos**
-- **Aplicaciones offline-first**
-
-## AWS AppFlow
-
-AppFlow es un servicio de integración que permite transferir datos de manera segura entre aplicaciones SaaS y servicios AWS sin necesidad de código.
-
-### Características Principales
-
-- **Transferencia bidireccional de datos**
-- **Transformación de datos durante la transferencia**
-- **Programación de flujos de datos**
-- **Filtrado y validación**
-- **Escalabilidad automática**
-
-### Conectores Disponibles
-
-- **SaaS:** Salesforce, SAP, Slack, Zendesk, etc.
-- **AWS:** S3, Redshift, Snowflake, etc.
-
-### Casos de Uso
-
-- **Integración de datos SaaS**
-- **Análisis de datos unificados**
-- **Sincronización de datos entre aplicaciones**
-- **Backup de datos SaaS**
-- **Migración de datos**
-
-## Patrones de Integración Comunes
-
-### Comunicación Sincrónica vs. Asincrónica
-
-- **Sincrónica (API Gateway):**
-  - Respuestas inmediatas
-  - Bloqueo del cliente hasta respuesta
-  - Más simple de implementar
-
-- **Asincrónica (SQS, SNS, EventBridge):**
-  - Mayor resilencia
-  - Mejor manejo de picos de carga
-  - Desacoplamiento de sistemas
-
-### Patrones de Mensajería Empresarial
-
-- **Publicación-Suscripción:** SNS, EventBridge
-- **Point-to-Point:** SQS
-- **Request-Reply:** API Gateway, SQS
-- **Competing Consumers:** SQS + múltiples consumidores
-- **Event-Driven Architecture:** EventBridge, Lambda
-
-### Diseño de Microservicios
-
-- **Comunicación entre servicios:** API Gateway, AppSync
-- **Coreografía vs. Orquestación:**
-  - Coreografía: Eventos (EventBridge, SNS)
-  - Orquestación: Flujos de trabajo definidos (Step Functions)
-
-### Gestión de Errores
-
-- **Dead Letter Queues (DLQ)**
-- **Reintentos y backoff exponencial**
-- **Circuit breakers**
-- **Compensating transactions**
-
-## Diseño de Arquitecturas Resilientes
-
-### Principios de Diseño
-
-- **Loose coupling:** Minimizar dependencias
-- **Service autonomy:** Componentes independientes
-- **Statelessness:** Minimizar estado compartido
-- **Idempotency:** Operaciones seguras para repetir
-- **Fault isolation:** Contener fallos
-
-### Patrones de Resiliencia
-
-- **Bulkhead pattern:** Aislamiento de recursos
-- **Circuit breaker:** Prevención de fallos en cascada
-- **Throttling:** Control de carga
-- **Retry with exponential backoff**
-- **Timeout management**
-
-### Estrategias de Recuperación
-
-- **Compensating transactions**
-- **Saga pattern con Step Functions**
-- **Checkpoint and resume**
-- **Exactly-once delivery**
-
-## Seguridad en la Integración
-
-### Control de Acceso
-
-- **IAM policies**
-- **Resource policies**
-- **Cross-account access**
-- **Lambda authorizers**
-- **Cognito integration**
-
-### Protección de Datos
-
-- **Encryption in transit and at rest**
-- **Private endpoints (Interface VPC Endpoints)**
-- **API keys and usage plans**
-- **Message data protection**
-
-### Auditoría y Compliance
-
-- **CloudTrail integration**
-- **CloudWatch Logs**
-- **Alerting on unusual patterns**
-- **Content validation**
-
-## Monitoreo y Observabilidad
-
-### Métricas Críticas
-
-- **Latency:** Tiempo de respuesta
-- **Error rates:** Tasa de fallos
-- **Throughput:** Volumen de transacciones
-- **Queue depth:** Backlog de mensajes
-- **Age of oldest message**
-
-### Herramientas
-
-- **CloudWatch:** Métricas, logs, alarmas
-- **X-Ray:** Distributed tracing
-- **CloudWatch Synthetics:** Canaries para pruebas
-- **Service Lens:** Visión unificada
-
-### Estrategias
-
-- **Distributed tracing**
-- **Correlation IDs**
-- **Log aggregation**
-- **Alerting and dashboards**
-- **Anomaly detection**
-
-## Consideraciones de Costos
-
-### Modelos de Precios
-
-- **Pay-per-use:** API Gateway, Lambda
-- **Tier-based:** SQS, SNS
-- **Instance-based:** Amazon MQ
-- **Data transfer costs**
-
-### Optimización
-
-- **Right-sizing:** Selección adecuada de servicios
-- **Caching strategies**
-- **Batching operations**
-- **Reserved capacity where available**
-- **Monitoring and budgeting**
-
-## Tendencias Futuras
-
-- **Event-driven architectures:** Mayor adopción
-- **Serverless integration:** Menos infraestructura
-- **AI-powered integration:** Automatización inteligente
-- **Low-code/no-code platforms**
-- **Multi-cloud integration patterns**
-
-## Conclusión
-
-Los servicios de integración y orquestación son componentes fundamentales para crear arquitecturas modernas en la nube. AWS ofrece un conjunto completo de servicios que permiten implementar patrones de integración eficientes para cualquier caso de uso, desde comunicaciones simples punto a punto hasta flujos de trabajo empresariales complejos.
-
-La selección de los servicios adecuados debe basarse en requisitos específicos como tipo de comunicación (síncrona vs. asíncrona), complejidad del flujo de trabajo, escalabilidad, requisitos de latencia y consideraciones de costo. Para la mayoría de las arquitecturas modernas, una combinación de estos servicios suele proporcionar la solución óptima.
-
-La tendencia hacia arquitecturas basadas en eventos, serverless y dirigidas por API continuará acelerándose, haciendo que estos servicios de integración sean cada vez más críticos para las organizaciones que buscan agilidad, escalabilidad y resiliencia en sus sistemas.
-
-## Referencias y Recursos Adicionales
-
-- [AWS Integration Services Documentation](https://aws.amazon.com/products/application-integration/)
-- [AWS Messaging Services Documentation](https://aws.amazon.com/messaging/)
-- [AWS Serverless Land - Patterns](https://serverlessland.com/patterns)
-- [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/)
-- [AWS Architecture Center](https://aws.amazon.com/architecture/)
-- [API Gateway Serverless Developer Guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/)
-- [Step Functions Developer Guide](https://docs.aws.amazon.com/step-functions/latest/dg/)
+## Escenario Práctico: EventDriven Corp Refactoriza a Arquitectura Asíncrona
+
+EventDriven Corp, una plataforma de e-commerce que procesa 10,000 pedidos diarios, sufría constantes timeouts y caídas durante picos de ventas (Black Friday, hot sales). Su arquitectura monolítica síncrona no escala. Este capítulo documenta la migración completa a arquitectura basada en eventos con código real que puedes implementar hoy.
+
+```mermaid
+flowchart TB
+    subgraph "Arquitectura Anterior (Monolítica)"
+        A[Frontend] -->|Síncrono| B[API Gateway]
+        B -->|HTTP| C[Monolito Java]
+        C -->|SQL| D[(RDS MySQL)]
+        C -->|Sync| E[Payment Gateway]
+        C -->|Sync| F[Inventory Service]
+        C -->|Sync| G[Email Service]
+        
+        style C fill:#ef4444
+    end
+    
+    subgraph "Arquitectura Nueva (Event-Driven)"
+        H[Frontend] -->|API| I[API Gateway]
+        I -->|Async| J[SQS Orders]
+        J -->|Poll| K[Order Worker Lambda]
+        K -->|Event| L[EventBridge]
+        L -->|Fan-out| M[Payment Queue]
+        L -->|Fan-out| N[Inventory Queue]
+        L -->|Fan-out| O[Notification Queue]
+        
+        M -->|Poll| P[Payment Lambda]
+        N -->|Poll| Q[Inventory Lambda]
+        O -->|Poll| R[Email Lambda]
+        
+        style I fill:#22c55e
+        style L fill:#22c55e
+    end
+```
+
+---
+
+## Diagnóstico Inicial: Métricas del Problema
+
+EventDriven Corp midió su sistema actual antes de migrar:
+
+| Métrica | Valor | Objetivo |
+|---------|-------|----------|
+| P99 Latency | 8.5 segundos | < 2 segundos |
+| Timeout rate | 12% | < 0.1% |
+| Throughput máximo | 500 req/min | 5000 req/min |
+| Error rate durante picos | 23% | < 1% |
+| Costo infraestructura | $12,000/mes | $8,000/mes |
+
+**Problema raíz identificado:** Acoplamiento síncrono entre servicios causa cascada de fallos.
+
+---
+
+## SQS vs SNS vs EventBridge: Cuándo Usar Cada Uno
+
+### Árbol de Decisiones
+
+```
+¿Necesitas encolar mensajes para procesamiento asíncrono?
+│
+├─ SÍ → ¿Requieres orden FIFO exacto?
+│   │
+│   ├─ SÍ → SQS FIFO Queue
+│   │         └─ Throuphput: 300 msg/sec (burst 3,000)
+│   │
+│   └─ NO → ¿Necesitas DLQ automática?
+│       │
+│       ├─ SÍ → SQS Standard Queue
+│       │         └─ Best effort ordering, at-least-once delivery
+│       │
+│       └─ NO → Reconsiderar arquitectura
+│
+└─ NO → ¿Necesitas notificar múltiples suscriptores?
+    │
+    ├─ SÍ → ¿Es fan-out simple o routing complejo?
+    │   │
+    │   ├─ Simple fan-out → SNS Topic
+    │   │         └─ Email, SMS, Lambda, SQS, HTTP
+    │   │
+    │   └─ Routing basado en contenido → EventBridge
+    │             └─ Reglas complejas, transformación, replay
+    │
+    └─ NO → Considerar Step Functions para orquestación
+```
+
+### Tabla Comparativa Detallada
+
+| Característica | SQS | SNS | EventBridge |
+|----------------|-----|-----|-------------|
+| **Patrón** | Point-to-point | Pub/Sub | Event Bus |
+| **Orden garantizado** | FIFO solo | No | No |
+| **Delivery** | At-least-once | At-least-once | At-least-once |
+| **Múltiples consumers** | No (competing consumers) | Sí (broadcast) | Sí (routing) |
+| **Retención** | 14 días | N/A | 24h default |
+| **Transformación** | No | No | Sí |
+| **Scheduling** | No | No | Sí |
+| **Cross-account** | Sí | Sí | Sí |
+| **Precio** | $0.40/million | $0.50/million | $1.00/million |
+| **Casos de uso** | Work queues, decoupling | Alerts, fan-out | EDA, SaaS integration |
+
+### Diagrama de Arquitectura: SQS vs SNS vs EventBridge
+
+```mermaid
+flowchart LR
+    subgraph "SQS - Point to Point"
+        A[Producer] -->|SendMessage| B[SQS Queue]
+        B -->|ReceiveMessage| C[Consumer 1]
+        B -.->|No| D[Consumer 2]
+        style B fill:#60a5fa
+    end
+    
+    subgraph "SNS - Fan Out"
+        E[Publisher] -->|Publish| F[SNS Topic]
+        F -->|Push| G[Email]
+        F -->|Push| H[Lambda]
+        F -->|Push| I[SQS Queue]
+        style F fill:#fbbf24
+    end
+    
+    subgraph "EventBridge - Content Based"
+        J[Source] -->|PutEvents| K[EventBridge Bus]
+        K -->|order.*| L[Payment Service]
+        K -->|user.*| M[Analytics]
+        K -->|transform| N[S3]
+        style K fill:#a855f7
+    end
+```
+
+---
+
+## Implementación Paso a Paso: EventDriven Corp
+
+### Fase 1: SQS - Colas de Pedidos
+
+#### 1.1 Crear Colas SQS
+
+```bash
+# Crear cola principal de pedidos
+aws sqs create-queue \
+    --queue-name orders-processing \
+    --attributes '{
+        "VisibilityTimeout": "300",
+        "MessageRetentionPeriod": "345600",
+        "ReceiveMessageWaitTimeSeconds": "20",
+        "RedrivePolicy": "{\\\"deadLetterTargetArn\\\":\\\"arn:aws:sqs:us-east-1:ACCOUNT:orders-dlq\\\",\\\"maxReceiveCount\\\":3}",
+        "KmsMasterKeyId": "alias/aws/sqs"
+    }'
+
+# Crear DLQ (Dead Letter Queue)
+aws sqs create-queue \
+    --queue-name orders-dlq \
+    --attributes '{
+        "MessageRetentionPeriod": "1209600",
+        "KmsMasterKeyId": "alias/aws/sqs"
+    }'
+
+# Crear cola FIFO para procesamiento ordenado (opcional)
+aws sqs create-queue \
+    --queue-name orders-processing.fifo \
+    --attributes '{
+        "FifoQueue": "true",
+        "ContentBasedDeduplication": "true",
+        "VisibilityTimeout": "300",
+        "RedrivePolicy": "{\\\"deadLetterTargetArn\\\":\\\"arn:aws:sqs:us-east-1:ACCOUNT:orders-dlq.fifo\\\",\\\"maxReceiveCount\\\":3}"
+    }'
+```
+
+#### 1.2 Productor de Mensajes (Node.js)
+
+```javascript
+// producers/orderProducer.js
+const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+
+const sqsClient = new SQSClient({ region: 'us-east-1' });
+const QUEUE_URL = process.env.ORDERS_QUEUE_URL;
+
+class OrderProducer {
+    async sendOrder(orderData) {
+        const message = {
+            orderId: orderData.orderId,
+            customerId: orderData.customerId,
+            items: orderData.items,
+            total: orderData.total,
+            timestamp: new Date().toISOString(),
+            // Metadata para trazabilidad
+            traceId: this.generateTraceId(),
+            source: 'web-checkout'
+        };
+
+        const params = {
+            QueueUrl: QUEUE_URL,
+            MessageBody: JSON.stringify(message),
+            MessageAttributes: {
+                'orderType': {
+                    DataType: 'String',
+                    StringValue: orderData.items.length > 5 ? 'bulk' : 'standard'
+                },
+                'priority': {
+                    DataType: 'String', 
+                    StringValue: orderData.total > 1000 ? 'high' : 'normal'
+                }
+            }
+        };
+
+        // Para colas FIFO, agregar MessageGroupId
+        if (QUEUE_URL.includes('.fifo')) {
+            params.MessageGroupId = orderData.customerId;
+            params.MessageDeduplicationId = orderData.orderId;
+        }
+
+        try {
+            const result = await sqsClient.send(new SendMessageCommand(params));
+            console.log(`Order ${orderData.orderId} sent: ${result.MessageId}`);
+            return result.MessageId;
+        } catch (error) {
+            console.error('Failed to send order:', error);
+            throw error;
+        }
+    }
+
+    generateTraceId() {
+        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Batch send para alta throughput
+    async sendOrdersBatch(orders) {
+        const { SQSClient, SendMessageBatchCommand } = require('@aws-sdk/client-sqs');
+        
+        const entries = orders.map((order, index) => ({
+            Id: index.toString(),
+            MessageBody: JSON.stringify(order),
+            MessageAttributes: {
+                'orderType': {
+                    DataType: 'String',
+                    StringValue: 'batch'
+                }
+            }
+        }));
+
+        const params = {
+            QueueUrl: QUEUE_URL,
+            Entries: entries
+        };
+
+        const result = await sqsClient.send(new SendMessageBatchCommand(params));
+        
+        if (result.Failed && result.Failed.length > 0) {
+            console.error('Failed messages:', result.Failed);
+        }
+        
+        return result.Successful;
+    }
+}
+
+module.exports = OrderProducer;
+```
+
+#### 1.3 Consumidor SQS (Python Lambda)
+
+```python
+# consumers/order_consumer.py
+import json
+import boto3
+import logging
+from decimal import Decimal
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Clientes AWS
+sqs = boto3.client('sqs')
+eventbridge = boto3.client('events')
+dynamodb = boto3.resource('dynamodb')
+orders_table = dynamodb.Table('orders')
+
+QUEUE_URL = 'https://sqs.us-east-1.amazonaws.com/ACCOUNT/orders-processing'
+
+
+def lambda_handler(event, context):
+    """
+    Procesa mensajes de SQS y enruta a EventBridge.
+    """
+    processed_orders = []
+    failed_orders = []
+    
+    for record in event['Records']:
+        try:
+            # Parse message
+            message = json.loads(record['body'])
+            trace_id = message.get('traceId', 'unknown')
+            
+            logger.info(f"Processing order {message['orderId']}, trace: {trace_id}")
+            
+            # Validar orden
+            if not validate_order(message):
+                raise ValueError(f"Invalid order: {message['orderId']}")
+            
+            # Guardar en DynamoDB
+            save_order_to_db(message)
+            
+            # Publicar evento para downstream services
+            publish_order_created_event(message)
+            
+            processed_orders.append(message['orderId'])
+            
+        except Exception as e:
+            logger.error(f"Failed to process order: {e}")
+            failed_orders.append({
+                'orderId': message.get('orderId', 'unknown'),
+                'error': str(e),
+                'receiptHandle': record['receiptHandle']
+            })
+    
+    # Manejar fallos
+    if failed_orders:
+        logger.warning(f"Failed to process {len(failed_orders)} orders")
+        # Los mensajes fallidos volverán a la cola (visibility timeout)
+        # Después de 3 intentos, van a DLQ
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'processed': len(processed_orders),
+            'failed': len(failed_orders)
+        })
+    }
+
+
+def validate_order(order):
+    """Valida estructura de orden."""
+    required_fields = ['orderId', 'customerId', 'items', 'total']
+    return all(field in order for field in required_fields)
+
+
+def save_order_to_db(order):
+    """Guarda orden en DynamoDB."""
+    item = {
+        'orderId': order['orderId'],
+        'customerId': order['customerId'],
+        'items': order['items'],
+        'total': Decimal(str(order['total'])),
+        'status': 'PENDING',
+        'createdAt': order['timestamp'],
+        'traceId': order.get('traceId', 'unknown')
+    }
+    
+    orders_table.put_item(Item=item)
+
+
+def publish_order_created_event(order):
+    """Publica evento a EventBridge."""
+    event = {
+        'Source': 'order-service',
+        'DetailType': 'order-created',
+        'Detail': json.dumps(order),
+        'EventBusName': 'eventdriven-events'
+    }
+    
+    eventbridge.put_events(Entries=[event])
+```
+
+#### 1.4 CloudFormation: SQS + Lambda
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'SQS Order Processing Stack'
+
+Resources:
+  # Main Queue
+  OrdersQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: orders-processing
+      VisibilityTimeout: 300
+      MessageRetentionPeriod: 345600
+      KmsMasterKeyId: alias/aws/sqs
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt OrdersDLQ.Arn
+        maxReceiveCount: 3
+
+  # Dead Letter Queue
+  OrdersDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: orders-dlq
+      MessageRetentionPeriod: 1209600
+      KmsMasterKeyId: alias/aws/sqs
+
+  # Lambda Function
+  OrderProcessorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: order-processor
+      Runtime: python3.11
+      Handler: order_consumer.lambda_handler
+      Code:
+        ZipFile: |
+          # Código inline (en producción usar S3)
+          def lambda_handler(event, context):
+              return {'statusCode': 200}
+      Environment:
+        Variables:
+          QUEUE_URL: !Ref OrdersQueue
+          TABLE_NAME: !Ref OrdersTable
+      Timeout: 60
+      MemorySize: 512
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  # Event Source Mapping (SQS -> Lambda)
+  OrderProcessorMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt OrdersQueue.Arn
+      FunctionName: !Ref OrderProcessorFunction
+      BatchSize: 10
+      MaximumBatchingWindowInSeconds: 5
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+
+  # DynamoDB Table
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: orders
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+        - AttributeName: customerId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: customer-index
+          KeySchema:
+            - AttributeName: customerId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # IAM Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SQSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt OrdersQueue.Arn
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                Resource: !GetAtt OrdersTable.Arn
+              - Effect: Allow
+                Action:
+                  - events:PutEvents
+                Resource: '*'
+
+Outputs:
+  QueueUrl:
+    Description: URL of the orders queue
+    Value: !Ref OrdersQueue
+  DLQUrl:
+    Description: URL of the dead letter queue
+    Value: !Ref OrdersDLQ
+```
+
+---
+
+## Step Functions: Orquestación de Workflows
+
+### Fase 2: Workflow de Procesamiento de Pedidos
+
+EventDriven Corp implementó un workflow que orquesta múltiples servicios:
+
+```mermaid
+flowchart TB
+    subgraph "Order Processing Workflow"
+        A[Start] --> B{Validate Order}
+        B -->|Valid| C[Check Inventory]
+        B -->|Invalid| X[Reject Order]
+        
+        C -->|Available| D[Process Payment]
+        C -->|Unavailable| Y[Backorder]
+        
+        D -->|Success| E[Update Inventory]
+        D -->|Failed| Z[Payment Failed]
+        
+        E --> F[Send Confirmation]
+        F --> G[End Success]
+        
+        X --> H[End Failure]
+        Y --> H
+        Z --> H
+    end
+    
+    style A fill:#22c55e
+    style G fill:#22c55e
+    style H fill:#ef4444
+```
+
+### Definición ASL (Amazon States Language)
+
+```json
+{
+  "Comment": "Order Processing State Machine",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "validate-order-function",
+        "Payload": {
+          "order.$": "$.order"
+        }
+      },
+      "ResultPath": "$.validation",
+      "Next": "IsOrderValid",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "RejectOrder",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "IsOrderValid": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.validation.Payload.isValid",
+          "BooleanEquals": true,
+          "Next": "CheckInventory"
+        }
+      ],
+      "Default": "RejectOrder"
+    },
+    "CheckInventory": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "check-inventory-function",
+        "Payload": {
+          "items.$": "$.order.items"
+        }
+      },
+      "ResultPath": "$.inventory",
+      "Next": "IsInventoryAvailable",
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ]
+    },
+    "IsInventoryAvailable": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.inventory.Payload.available",
+          "BooleanEquals": true,
+          "Next": "ProcessPayment"
+        }
+      ],
+      "Default": "CreateBackorder"
+    },
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "process-payment-function",
+        "Payload": {
+          "amount.$": "$.order.total",
+          "customerId.$": "$.order.customerId",
+          "orderId.$": "$.order.orderId"
+        }
+      },
+      "ResultPath": "$.payment",
+      "Next": "IsPaymentSuccessful",
+      "Catch": [
+        {
+          "ErrorEquals": ["PaymentFailed"],
+          "Next": "HandlePaymentFailure"
+        }
+      ]
+    },
+    "IsPaymentSuccessful": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.payment.Payload.status",
+          "StringEquals": "SUCCESS",
+          "Next": "ReserveInventory"
+        }
+      ],
+      "Default": "HandlePaymentFailure"
+    },
+    "ReserveInventory": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "reserve-inventory-function",
+        "Payload": {
+          "items.$": "$.order.items",
+          "orderId.$": "$.order.orderId"
+        }
+      },
+      "ResultPath": "$.reservation",
+      "Next": "SendConfirmation"
+    },
+    "SendConfirmation": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "EmailConfirmation",
+          "States": {
+            "EmailConfirmation": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "send-email-function",
+                "Payload": {
+                  "template": "order-confirmation",
+                  "customerId.$": "$.order.customerId",
+                  "orderId.$": "$.order.orderId"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "SMSNotification",
+          "States": {
+            "SMSNotification": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "send-sms-function",
+                "Payload": {
+                  "message": "Your order has been confirmed!",
+                  "customerId.$": "$.order.customerId"
+                }
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "OrderSuccess"
+    },
+    "OrderSuccess": {
+      "Type": "Succeed"
+    },
+    "RejectOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "log-rejection-function",
+        "Payload": {
+          "order.$": "$.order",
+          "reason": "Validation failed"
+        }
+      },
+      "Next": "OrderFailed"
+    },
+    "CreateBackorder": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "create-backorder-function",
+        "Payload": {
+          "order.$": "$.order"
+        }
+      },
+      "Next": "OrderFailed"
+    },
+    "HandlePaymentFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "payment-failure-handler",
+        "Payload": {
+          "order.$": "$.order",
+          "error.$": "$.error"
+        }
+      },
+      "Next": "OrderFailed"
+    },
+    "OrderFailed": {
+      "Type": "Fail",
+      "Error": "OrderProcessingFailed",
+      "Cause": "Order could not be processed"
+    }
+  }
+}
+```
+
+### CloudFormation: Step Functions
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Order Processing State Machine'
+
+Resources:
+  OrderStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: order-processing-workflow
+      RoleArn: !GetAtt StateMachineRole.Arn
+      Type: STANDARD
+      DefinitionString: !Sub |
+        {
+          "Comment": "Order Processing State Machine",
+          "StartAt": "ValidateOrder",
+          "States": {
+            "ValidateOrder": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "validate-order-function",
+                "Payload": {
+                  "order.$": "$.order"
+                }
+              },
+              "ResultPath": "$.validation",
+              "Next": "CheckResult"
+            },
+            "CheckResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.validation.Payload.isValid",
+                  "BooleanEquals": true,
+                  "Next": "ProcessOrder"
+                }
+              ],
+              "Default": "OrderFailed"
+            },
+            "ProcessOrder": {
+              "Type": "Succeed"
+            },
+            "OrderFailed": {
+              "Type": "Fail",
+              "Error": "OrderProcessingFailed"
+            }
+          }
+        }
+      LoggingConfiguration:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt StateMachineLogGroup.Arn
+
+  StateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/stepfunctions/order-processing
+      RetentionInDays: 30
+
+  StateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaInvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: '*'
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogDelivery
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
+                  - logs:PutResourcePolicy
+                  - logs:DescribeResourcePolicies
+                  - logs:DescribeLogGroups
+                Resource: '*'
+
+Outputs:
+  StateMachineArn:
+    Description: ARN of the state machine
+    Value: !Ref OrderStateMachine
+```
+
+---
+
+## Dead Letter Queues en Práctica
+
+### Arquitectura DLQ de EventDriven Corp
+
+```mermaid
+flowchart LR
+    A[Producer] -->|Message| B[SQS Main Queue]
+    B -->|Receive| C[Consumer Lambda]
+    C -->|Success| D[Delete]
+    C -->|Failure| E[VisibilityTimeout]
+    E -->|Retry 1| C
+    E -->|Retry 2| C
+    E -->|Retry 3| F[DLQ]
+    
+    F -->|Alert| G[SNS]
+    G -->|Email| H[Ops Team]
+    F -->|Analysis| I[Lambda Replay]
+    
+    style F fill:#ef4444
+    style D fill:#22c55e
+```
+
+### Implementación de DLQ
+
+```bash
+# Configuración de DLQ con CLI
+aws sqs set-queue-attributes \
+    --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/orders-processing \
+    --attributes '{
+        "RedrivePolicy": "{\\\"deadLetterTargetArn\\\":\\\"arn:aws:sqs:us-east-1:ACCOUNT:orders-dlq\\\",\\\"maxReceiveCount\\\":3}",
+        "VisibilityTimeout": "300"
+    }'
+
+# Ver mensajes en DLQ
+aws sqs receive-message \
+    --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/orders-dlq \
+    --attribute-names All \
+    --message-attribute-names All \
+    --max-number-of-messages 10
+```
+
+### Lambda para Reprocesar DLQ
+
+```python
+# dlq_reprocessor.py
+import json
+import boto3
+from datetime import datetime
+
+sqs = boto3.client('sqs')
+
+DLQ_URL = 'https://sqs.us-east-1.amazonaws.com/ACCOUNT/orders-dlq'
+MAIN_QUEUE_URL = 'https://sqs.us-east-1.amazonaws.com/ACCOUNT/orders-processing'
+
+
+def lambda_handler(event, context):
+    """
+    Reprocesa mensajes de DLQ.
+    Útil después de fixear un bug.
+    """
+    messages = []
+    
+    # Leer mensajes de DLQ (hasta 10)
+    response = sqs.receive_message(
+        QueueUrl=DLQ_URL,
+        MaxNumberOfMessages=10,
+        VisibilityTimeout=300,
+        AttributeNames=['All']
+    )
+    
+    if 'Messages' not in response:
+        return {
+            'statusCode': 200,
+            'body': json.dumps('No messages in DLQ')
+        }
+    
+    for message in response['Messages']:
+        try:
+            # Parse body original
+            body = json.loads(message['Body'])
+            
+            # Agregar metadata de reprocesamiento
+            if 'dlqMetadata' not in body:
+                body['dlqMetadata'] = {
+                    'originalTimestamp': message['Attributes']['SentTimestamp'],
+                    'retryCount': 0
+                }
+            
+            body['dlqMetadata']['retryCount'] += 1
+            body['dlqMetadata']['reprocessedAt'] = datetime.utcnow().isoformat()
+            
+            # Reenviar a cola principal
+            sqs.send_message(
+                QueueUrl=MAIN_QUEUE_URL,
+                MessageBody=json.dumps(body),
+                MessageAttributes=message.get('MessageAttributes', {})
+            )
+            
+            # Eliminar de DLQ
+            sqs.delete_message(
+                QueueUrl=DLQ_URL,
+                ReceiptHandle=message['ReceiptHandle']
+            )
+            
+            messages.append({
+                'messageId': message['MessageId'],
+                'status': 'reprocessed'
+            })
+            
+        except Exception as e:
+            print(f"Failed to reprocess message {message['MessageId']}: {e}")
+            messages.append({
+                'messageId': message['MessageId'],
+                'status': 'failed',
+                'error': str(e)
+            })
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'reprocessed': len([m for m in messages if m['status'] == 'reprocessed']),
+            'failed': len([m for m in messages if m['status'] == 'failed']),
+            'messages': messages
+        })
+    }
+```
+
+---
+
+## Patrones de Arquitectura
+
+### Patrón 1: Fan-Out con SNS
+
+```mermaid
+flowchart LR
+    A[Order Service] -->|Publish| B[SNS Topic]
+    B -->|Push| C[Email Service]
+    B -->|Push| D[SMS Service]
+    B -->|Push| E[Analytics SQS]
+    B -->|Push| F[CRM Lambda]
+    B -->|Push| G[Audit Log S3]
+    
+    style B fill:#fbbf24
+```
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  OrderTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: orders-created
+      DisplayName: Orders Created
+      FifoTopic: false
+      KmsMasterKeyId: alias/aws/sns
+
+  # Suscripción Email
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      Endpoint: ops@eventdriven.com
+      TopicArn: !Ref OrderTopic
+
+  # Suscripción Lambda
+  LambdaSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: lambda
+      Endpoint: !GetAtt CRMSyncFunction.Arn
+      TopicArn: !Ref OrderTopic
+      FilterPolicy:
+        orderType:
+          - premium
+          - enterprise
+
+  # Suscripción SQS con DLQ
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: orders-analytics
+
+  SqsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt SQSQueue.Arn
+      TopicArn: !Ref OrderTopic
+      RawMessageDelivery: true
+```
+
+### Patrón 2: Saga Pattern con Step Functions
+
+```mermaid
+flowchart TB
+    subgraph "Saga: Travel Booking"
+        A[Start Booking] --> B[Book Flight]
+        B -->|Success| C[Book Hotel]
+        B -->|Fail| X[Rollback]
+        
+        C -->|Success| D[Book Car]
+        C -->|Fail| Y[Cancel Hotel]
+        
+        D -->|Success| E[Complete]
+        D -->|Fail| Z[Cancel Flight]
+        
+        Y --> X
+        Z --> Y
+        
+        X --> F[Booking Failed]
+    end
+    
+    style E fill:#22c55e
+    style F fill:#ef4444
+```
+
+```json
+{
+  "Comment": "Travel Booking Saga",
+  "StartAt": "BookFlight",
+  "States": {
+    "BookFlight": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "book-flight-function"
+      },
+      "ResultPath": "$.flight",
+      "Next": "BookHotel",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "BookingFailed",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "BookHotel": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "book-hotel-function"
+      },
+      "ResultPath": "$.hotel",
+      "Next": "BookCar",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "CancelFlight",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "BookCar": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "book-car-function"
+      },
+      "ResultPath": "$.car",
+      "Next": "BookingSuccess",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "CompensateHotelAndFlight",
+          "ResultPath": "$.error"
+        }
+      ]
+    },
+    "CompensateHotelAndFlight": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "CancelHotel",
+          "States": {
+            "CancelHotel": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "cancel-hotel-function",
+                "Payload": {
+                  "reservationId.$": "$.hotel.reservationId"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "CancelFlight",
+          "States": {
+            "CancelFlight": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "cancel-flight-function",
+                "Payload": {
+                  "reservationId.$": "$.flight.reservationId"
+                }
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "BookingFailed"
+    },
+    "CancelFlight": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "cancel-flight-function"
+      },
+      "Next": "BookingFailed"
+    },
+    "BookingSuccess": {
+      "Type": "Succeed"
+    },
+    "BookingFailed": {
+      "Type": "Fail",
+      "Error": "BookingFailed",
+      "Cause": "Booking could not be completed"
+    }
+  }
+}
+```
+
+### Patrón 3: Circuit Breaker
+
+```python
+# circuit_breaker.py
+import json
+import boto3
+from datetime import datetime, timedelta
+
+dynamodb = boto3.resource('dynamodb')
+circuit_table = dynamodb.Table('circuit-breakers')
+
+class CircuitBreaker:
+    def __init__(self, service_name, failure_threshold=5, timeout=60):
+        self.service_name = service_name
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.state = self.get_state()
+    
+    def get_state(self):
+        response = circuit_table.get_item(
+            Key={'serviceName': self.service_name}
+        )
+        if 'Item' in response:
+            return response['Item']
+        return {
+            'serviceName': self.service_name,
+            'state': 'CLOSED',
+            'failureCount': 0,
+            'lastFailureTime': None
+        }
+    
+    def can_execute(self):
+        if self.state['state'] == 'OPEN':
+            last_failure = self.state.get('lastFailureTime')
+            if last_failure:
+                last_failure = datetime.fromisoformat(last_failure)
+                if datetime.utcnow() - last_failure > timedelta(seconds=self.timeout):
+                    self.state['state'] = 'HALF_OPEN'
+                    self.update_state()
+                    return True
+            return False
+        return True
+    
+    def record_success(self):
+        self.state['failureCount'] = 0
+        self.state['state'] = 'CLOSED'
+        self.update_state()
+    
+    def record_failure(self):
+        self.state['failureCount'] += 1
+        self.state['lastFailureTime'] = datetime.utcnow().isoformat()
+        
+        if self.state['failureCount'] >= self.failure_threshold:
+            self.state['state'] = 'OPEN'
+        
+        self.update_state()
+    
+    def update_state(self):
+        circuit_table.put_item(Item=self.state)
+
+
+def lambda_handler(event, context):
+    cb = CircuitBreaker('payment-service')
+    
+    if not cb.can_execute():
+        return {
+            'statusCode': 503,
+            'body': json.dumps('Payment service unavailable')
+        }
+    
+    try:
+        # Call external service
+        result = call_payment_service(event)
+        cb.record_success()
+        return result
+    except Exception as e:
+        cb.record_failure()
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f'Payment failed: {str(e)}')
+        }
+```
+
+---
+
+## EventBridge: Routing Avanzado
+
+### Configuración de EventBus
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'EventBridge Configuration'
+
+Resources:
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: eventdriven-events
+      EventBusPolicy:
+        Statement:
+          - Sid: AllowCrossAccountAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: events:PutEvents
+            Resource: !GetAtt EventBus.Arn
+
+  # Rule: High Value Orders
+  HighValueOrderRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: high-value-orders
+      Description: Route orders > $1000 to priority processing
+      EventBusName: !Ref EventBus
+      EventPattern:
+        source:
+          - order-service
+        detail-type:
+          - order-created
+        detail:
+          total:
+            - numeric:
+                - '>'
+                - 1000
+      Targets:
+        - Id: PriorityQueue
+          Arn: !GetAtt PriorityQueue.Arn
+          InputTransformer:
+            InputPathsMap:
+              orderId: "$.detail.orderId"
+              total: "$.detail.total"
+              customerId: "$.detail.customerId"
+            InputTemplate: |
+              {
+                "orderId": <orderId>,
+                "priority": "HIGH",
+                "total": <total>,
+                "requiresManualReview": true
+              }
+
+  # Rule: Failed Payments
+  FailedPaymentRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: failed-payments
+      EventBusName: !Ref EventBus
+      EventPattern:
+        source:
+          - payment-service
+        detail-type:
+          - payment-failed
+      Targets:
+        - Id: DLQueue
+          Arn: !GetAtt FailedPaymentQueue.Arn
+        - Id: AlertLambda
+          Arn: !GetAtt AlertFunction.Arn
+
+  PriorityQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: priority-orders
+
+  FailedPaymentQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: failed-payments
+
+  AlertFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: payment-alert
+      Runtime: python3.11
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          import boto3
+          def handler(event, context):
+              print("Payment failed alert:", event)
+              return {'statusCode': 200}
+      Role: !GetAtt LambdaRole.Arn
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+```
+
+---
+
+## Anti-Patrones y Soluciones
+
+| Anti-Patrón | Problema | Solución |
+|-------------|----------|----------|
+| **SQS sin DLQ** | Mensajes fallidos reintentan infinitamente | Configurar RedrivePolicy con maxReceiveCount=3 |
+| **SNS sin filtrado** | Todos los suscriptores reciben todo | Usar FilterPolicy en suscripciones |
+| **Step Functions sin retry** | Fallos transitorios matan el workflow | Configurar Retry en tasks |
+| **EventBridge sin dead letter** | Eventos perdidos en targets fallidos | Configurar DeadLetterConfig |
+| **SQS polling continuo** | Costo innecesario | Usar long polling (WaitTimeSeconds=20) |
+| **Mensajes sin idempotency** | Procesamiento duplicado | Implementar idempotency keys |
+| **Step Functions Express para workflows largos** | Timeout después de 5 min | Usar Standard workflows |
+| **SNS HTTP sin retry** | Webhooks perdidos | Implementar retry con backoff |
+
+---
+
+## Troubleshooting
+
+### Problema: Lambda No Consume Mensajes SQS
+
+```bash
+# Diagnóstico
+# 1. Verificar event source mapping
+aws lambda list-event-source-mappings \
+    --function-name order-processor
+
+# 2. Verificar IAM permissions
+aws iam simulate-principal-policy \
+    --policy-source-arn arn:aws:iam::ACCOUNT:role/lambda-role \
+    --action-names sqs:ReceiveMessage sqs:DeleteMessage
+
+# 3. Verificar queue attributes
+aws sqs get-queue-attributes \
+    --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/orders-processing \
+    --attribute-names All
+
+# 4. Verificar CloudWatch Logs
+aws logs tail /aws/lambda/order-processor --follow
+```
+
+### Problema: Step Functions Timeout
+
+```bash
+# Verificar ejecuciones fallidas
+aws stepfunctions list-executions \
+    --state-machine-arn arn:aws:states:us-east-1:ACCOUNT:stateMachine:order-workflow \
+    --status-filter FAILED
+
+# Ver detalle de ejecución fallida
+aws stepfunctions get-execution-history \
+    --execution-arn arn:aws:states:us-east-1:ACCOUNT:execution:order-workflow:run-id \
+    --reverse-order
+```
+
+### Problema: EventBridge No Enruta Eventos
+
+```bash
+# Test event
+aws events put-events --entries '{
+    "Source": "test-service",
+    "DetailType": "test-event",
+    "Detail": "{\"test\": \"data\"}",
+    "EventBusName": "eventdriven-events"
+}'
+
+# Verificar reglas
+aws events list-rules --event-bus-name eventdriven-events
+
+# Verificar targets
+aws events list-targets-by-rule \
+    --rule high-value-orders \
+    --event-bus-name eventdriven-events
+```
+
+---
+
+## Ejercicio Práctico: Implementa tu Pipeline
+
+### Laboratorio: Pipeline de Procesamiento de Pedidos
+
+**Objetivo:** Crear un pipeline completo usando SQS, Lambda y EventBridge.
+
+**Duración:** 2 horas
+
+#### Parte 1: Crear Colas SQS (20 min)
+
+```bash
+# Tarea 1.1: Crear cola principal y DLQ
+aws sqs create-queue --queue-name lab-orders
+aws sqs create-queue --queue-name lab-orders-dlq
+
+# Obtener ARN de DLQ
+DLQ_ARN=$(aws sqs get-queue-attributes \
+    --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/lab-orders-dlq \
+    --attribute-names QueueArn --query 'Attributes.QueueArn' --output text)
+
+# Configurar redrive policy
+aws sqs set-queue-attributes \
+    --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/lab-orders \
+    --attributes "{\"RedrivePolicy\":\"{\\\"deadLetterTargetArn\\\":\\\"$DLQ_ARN\\\",\\\"maxReceiveCount\\\":3}\"}"
+```
+
+#### Parte 2: Crear Lambda Consumer (30 min)
+
+```python
+# lab_consumer.py
+import json
+import boto3
+
+def lambda_handler(event, context):
+    for record in event['Records']:
+        message = json.loads(record['body'])
+        print(f"Processing: {message}")
+        # Aquí iría la lógica de procesamiento
+    return {'statusCode': 200}
+```
+
+```bash
+# Empaquetar y deployar
+zip lambda.zip lab_consumer.py
+aws lambda create-function \
+    --function-name lab-order-consumer \
+    --runtime python3.11 \
+    --role arn:aws:iam::ACCOUNT:role/lambda-role \
+    --handler lab_consumer.lambda_handler \
+    --zip-file fileb://lambda.zip
+```
+
+#### Parte 3: Conectar SQS a Lambda (20 min)
+
+```bash
+# Crear event source mapping
+aws lambda create-event-source-mapping \
+    --function-name lab-order-consumer \
+    --event-source-arn $(aws sqs get-queue-attributes \
+        --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/lab-orders \
+        --attribute-names QueueArn --query 'Attributes.QueueArn' --output text) \
+    --batch-size 10
+```
+
+#### Parte 4: Probar el Pipeline (20 min)
+
+```bash
+# Enviar mensajes de prueba
+for i in {1..10}; do
+    aws sqs send-message \
+        --queue-url https://sqs.us-east-1.amazonaws.com/ACCOUNT/lab-orders \
+        --message-body "{\"orderId\": \"ORDER-$i\", \"amount\": $((RANDOM % 1000))}"
+done
+
+# Verificar CloudWatch logs
+aws logs tail /aws/lambda/lab-order-consumer
+```
+
+#### Parte 5: Crear EventBridge Rule (30 min)
+
+```bash
+# Crear EventBus
+aws events create-event-bus --name lab-events
+
+# Crear regla
+aws events put-rule \
+    --name high-value-rule \
+    --event-bus lab-events \
+    --event-pattern '{"source": ["order-service"], "detail": {"amount": [{"numeric": [">", 500]}]}}'
+
+# Agregar target
+aws events put-targets \
+    --rule high-value-rule \
+    --event-bus lab-events \
+    --targets "Id=1,Arn=arn:aws:sns:us-east-1:ACCOUNT:lab-notifications"
+```
+
+### Criterios de Éxito
+
+- [ ] SQS cola con DLQ configurada
+- [ ] Lambda consumiendo mensajes automáticamente
+- [ ] Mensajes de prueba procesados correctamente
+- [ ] EventBridge rule filtrando eventos
+- [ ] CloudWatch logs mostrando procesamiento
+
+---
+
+## Referencias Rápidas
+
+### Límites de Servicios
+
+| Servicio | Límite | Notas |
+|----------|--------|-------|
+| SQS Standard | Mensaje: 256KB | Usar S3 para payloads grandes |
+| SQS FIFO | 300 msg/sec | Burst: 3,000 msg/sec |
+| SNS | Mensaje: 256KB | 12.5M subscripciones por topic |
+| EventBridge | Evento: 256KB | 500 eventos/sec por región (default) |
+| Step Functions Standard | 1 año | 2,000 ejecuciones paralelas |
+| Step Functions Express | 5 min | 100,000 ejecuciones paralelas |
+
+### Costos Estimados
+
+| Escenario | SQS | SNS | EventBridge | Step Functions |
+|-----------|-----|-----|-------------|----------------|
+| 1M requests/mes | $0.40 | $0.50 | $1.00 | $25 (Standard) |
+| 100M requests/mes | $40 | $50 | $100 | $2,500 |
+| 1B requests/mes | $400 | $500 | $1,000 | $25,000 |
+
+### Recursos Adicionales
+
+- [AWS SQS Developer Guide](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/)
+- [AWS SNS Developer Guide](https://docs.aws.amazon.com/sns/latest/dg/)
+- [AWS EventBridge User Guide](https://docs.aws.amazon.com/eventbridge/latest/userguide/)
+- [AWS Step Functions Developer Guide](https://docs.aws.amazon.com/step-functions/latest/dg/)
+- [AWS Well-Architected: Serverless Applications Lens](https://docs.aws.amazon.com/wellarchitected/latest/serverless-applications-lens/)

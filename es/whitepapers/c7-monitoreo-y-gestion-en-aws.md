@@ -1,535 +1,816 @@
 # Capítulo 7: Monitoreo y Gestión en AWS
 
-## Resumen Ejecutivo
-
-El monitoreo y la gestión efectiva de recursos se han convertido en componentes críticos para operar exitosamente en la nube. Amazon Web Services (AWS) ofrece un conjunto integral de servicios diseñados para proporcionar visibilidad, control y automatización sobre toda la infraestructura y aplicaciones alojadas en la plataforma. Este whitepaper explora en profundidad los principales servicios de monitoreo y gestión de AWS, sus características, casos de uso y mejores prácticas para implementación. La comprensión adecuada de estas herramientas es fundamental para garantizar el rendimiento, la disponibilidad, la seguridad y la optimización de costos de los entornos AWS.
-
-## Amazon CloudWatch
-
-CloudWatch es el servicio fundamental de monitoreo y observabilidad de AWS, proporcionando datos e insights procesables para todo el stack de AWS, aplicaciones híbridas y recursos on-premises.
-
-### Componentes Principales
-
-#### CloudWatch Metrics
-
-- **Métricas estándar:** Recopiladas automáticamente para servicios AWS
-- **Métricas personalizadas:** Definidas por el usuario para aplicaciones
-- **Estadísticas:** Agregaciones y cálculos sobre datos métricos
-- **Dimensiones:** Pares nombre-valor para identificar métricas específicas
-- **Resolución:** Estándar (60 segundos) o alta resolución (1 segundo)
-- **Retención:** 15 meses por defecto
-
-#### CloudWatch Logs
-
-- **Grupos de logs:** Agrupaciones lógicas de flujos de log
-- **Flujos de log:** Secuencias de eventos de log
-- **Filtros métricos:** Conversión de logs a métricas
-- **Insights:** Consultas interactivas sobre datos de log
-- **Live Tail:** Visualización de logs en tiempo real
-- **Exportación:** S3, Firehose, Lambda
-
-#### CloudWatch Alarms
-
-- **Alarmas métricas:** Basadas en umbrales, anomalías o expresiones matemáticas
-- **Alarmas compuestas:** Combinación de múltiples alarmas
-- **Acciones:** Notificaciones, Auto Scaling, EC2, Systems Manager
-- **Estados:** OK, ALARM, INSUFFICIENT_DATA
-
-#### CloudWatch Dashboard
-
-- **Visualizaciones personalizables**
-- **Widgets de métricas, logs, rastreos**
-- **Cross-region y cross-account**
-- **Compartición y acceso público opcional**
-
-#### CloudWatch Events / EventBridge
-
-- **Bus de eventos para respuesta a cambios**
-- **Reglas para filtrar eventos**
-- **Targets para ejecutar acciones**
-- **Patrones de eventos predefinidos**
-
-#### CloudWatch Synthetics
-
-- **Canaries:** Scripts que monitorean endpoints y APIs
-- **Blueprints:** Plantillas preconfiguradas
-- **Monitoreo de disponibilidad y latencia**
-- **Verificación de funcionalidad**
-
-#### CloudWatch RUM (Real User Monitoring)
-
-- **Telemetría de lado del cliente**
-- **Experiencia de usuario real**
-- **Rendimiento de páginas, errores, comportamiento**
-
-### Casos de Uso
-
-- **Monitoreo de infraestructura:** Rendimiento de EC2, RDS, etc.
-- **Monitoreo de aplicaciones:** Latencia, errores, tasa de solicitudes
-- **Monitoreo operacional:** Estado general del sistema
-- **Detección de anomalías:** Identificación de comportamientos inusuales
-- **Troubleshooting:** Análisis de logs y métricas para resolución de problemas
-- **Automatización:** Acciones basadas en métricas y eventos
-
-### Mejores Prácticas
-
-- **Definición de líneas base de rendimiento**
-- **Configuración de alarmas proactivas**
-- **Consolidación de logs centralizados**
-- **Creación de dashboards por caso de uso**
-- **Implementación de alta resolución para métricas críticas**
-- **Uso de namespaces consistentes para métricas personalizadas**
-
-## AWS CloudTrail
-
-CloudTrail es un servicio que permite gobernanza, cumplimiento, auditoría operacional y auditoría de riesgos de una cuenta AWS.
-
-### Funcionalidades Principales
-
-- **Registro de actividad:** Captura de todas las llamadas a la API de AWS
-- **Event history:** 90 días de historial de eventos de gestión
-- **Trails:** Configuraciones para entrega continua de eventos
-- **Insights:** Detección de actividad inusual
-- **Validación de archivos de log:** Verificación de integridad
-- **Integración con EventBridge:** Automatización basada en eventos de API
-
-### Tipos de Eventos
-
-- **Eventos de gestión:** Operaciones en recursos AWS (por defecto)
-- **Eventos de datos:** Operaciones en objetos dentro de recursos (S3, Lambda, DynamoDB)
-- **Eventos de Insights:** Detección de anomalías en patrones de API
-
-### Configuraciones Típicas
-
-- **Organización:** Trails para todas las cuentas de AWS Organizations
-- **Multi-región:** Captura de actividad en todas las regiones
-- **S3 centralizado:** Almacenamiento consolidado de logs
-- **Cifrado:** Protección con KMS
-- **Notificaciones:** Alertas via SNS
-
-### Casos de Uso
-
-- **Auditoría de seguridad:** Quién hizo qué, cuándo y desde dónde
-- **Cumplimiento normativo:** Evidencia para requisitos regulatorios
-- **Troubleshooting operacional:** Identificación de cambios problemáticos
-- **Análisis forense:** Investigación post-incidentes
-- **Monitoreo de cambios en recursos:** Tracking de modificaciones
-
-### Mejores Prácticas
-
-- **Habilitar para todas las regiones y cuentas**
-- **Configurar para eventos de gestión y datos críticos**
-- **Establecer validación de archivos de log**
-- **Implementar notificaciones para eventos críticos**
-- **Integrar con soluciones SIEM**
-- **Revisar Insights regularmente**
-
-## AWS Config
-
-AWS Config proporciona un inventario detallado de los recursos AWS y su historial de configuración, permitiendo auditar cambios y evaluar el cumplimiento.
-
-### Componentes Clave
-
-- **Configuration Items:** Registro de atributos de un recurso
-- **Configuration History:** Línea temporal de cambios
-- **Configuration Recorder:** Detector de cambios
-- **Configuration Snapshots:** Captura completa en un momento dado
-- **Resource Relationships:** Mapeo de dependencias
-- **Config Rules:** Evaluaciones de conformidad
-- **Conformance Packs:** Conjuntos de reglas para escenarios comunes
-- **Remediations:** Acciones correctivas automáticas
-
-### Tipos de Reglas
-
-- **Reglas gestionadas por AWS:** Predefinidas para casos comunes
-- **Reglas personalizadas:** Definidas con Lambda
-- **Evaluación continua:** En cada cambio de configuración
-- **Evaluación periódica:** En intervalos regulares
-
-### Casos de Uso
-
-- **Evaluación de conformidad:** Validación contra políticas
-- **Seguimiento de cambios:** Registro histórico de modificaciones
-- **Auditoría de seguridad:** Detección de configuraciones inseguras
-- **Solución de problemas:** Análisis de cambios que causaron problemas
-- **Gobernanza de recursos:** Visibilidad del estado de configuración
-- **Administración de cambios:** Control sobre modificaciones
-
-### Mejores Prácticas
-
-- **Habilitar para recursos críticos en todas las regiones**
-- **Utilizar aggregators para visión multi-cuenta**
-- **Implementar reglas para estándares de cumplimiento**
-- **Configurar remediación automática para desviaciones**
-- **Integrar con SNS para notificaciones**
-- **Revisar regularmente dashboard de conformidad**
-
-## AWS Systems Manager
-
-Systems Manager es un servicio de gestión que proporciona visibilidad y control sobre la infraestructura AWS y on-premises.
-
-### Capacidades Principales
-
-#### Resource Management
-
-- **Fleet Manager:** Gestión de servidores y máquinas virtuales
-- **Compliance:** Escaneo de parches y configuraciones
-- **Inventory:** Recopilación de metadatos de software
-- **State Manager:** Configuración consistente
-- **Patch Manager:** Automatización de parches
-- **Distributor:** Distribución de paquetes
-
-#### Operations Management
-
-- **Explorer:** Dashboard operacional
-- **OpsCenter:** Centro de resolución de problemas
-- **Incident Manager:** Gestión de incidentes
-- **Maintenance Windows:** Programación de tareas
-- **Change Manager:** Gestión de cambios empresariales
-- **Application Manager:** Gestión de aplicaciones
-
-#### Actions & Change
-
-- **Automation:** Simplificación de tareas comunes
-- **Change Calendar:** Control de ventanas de cambio
-- **Run Command:** Ejecución remota de comandos
-- **Session Manager:** Acceso shell basado en web
-- **Parameter Store:** Gestión de configuración y secretos
-
-### Arquitectura
-
-- **SSM Agent:** Software cliente en instancias gestionadas
-- **Endpoints de servicio:** Comunicación segura con AWS
-- **Documents:** Definición de acciones a ejecutar
-- **IAM integration:** Control de acceso granular
-- **Hybrid Activations:** Soporte para servidores on-premises
-
-### Casos de Uso
-
-- **Gestión de flotas heterogéneas:** AWS y on-premises
-- **Automatización operacional:** Tareas repetitivas
-- **Mantenimiento programado:** Parches y actualizaciones
-- **Cumplimiento y gobernanza:** Conformidad continua
-- **Respuesta a incidentes:** Detección y mitigación
-- **Acceso seguro a instancias:** Sin puertos abiertos
-
-### Mejores Prácticas
-
-- **Instalar SSM Agent en todas las instancias**
-- **Utilizar roles IAM con privilegios mínimos**
-- **Implementar tags consistentes para agrupación**
-- **Establecer programas de parches automatizados**
-- **Centralizar parámetros y configuraciones**
-- **Documentar procedimientos como Automations**
-
-## AWS Trusted Advisor
-
-Trusted Advisor es un servicio que proporciona recomendaciones en tiempo real para optimizar entornos AWS según las mejores prácticas.
-
-### Categorías de Verificación
-
-- **Optimización de costos:** Recursos infrautilizados, reservas
-- **Rendimiento:** Optimización de servicios
-- **Seguridad:** Vulnerabilidades y permisos excesivos
-- **Tolerancia a fallos:** Redundancia y backups
-- **Límites de servicio:** Uso cercano a límites
-
-### Niveles de Servicio
-
-- **Core checks:** Verificaciones básicas (todos los planes)
-- **Full checks:** Verificaciones completas (Business/Enterprise Support)
-- **Programmatic access:** API para automatización (Business/Enterprise)
-
-### Casos de Uso
-
-- **Optimización continua:** Mejora proactiva
-- **Reducción de costos:** Identificación de ahorros
-- **Validación de arquitectura:** Cumplimiento de mejores prácticas
-- **Verificación de seguridad:** Detección de configuraciones inseguras
-- **Planificación de capacidad:** Monitoreo de límites de servicio
-
-### Mejores Prácticas
-
-- **Revisar regularmente el dashboard**
-- **Priorizar recomendaciones por impacto**
-- **Automatizar acciones correctivas para hallazgos comunes**
-- **Integrar con notificaciones (SNS)**
-- **Establecer proceso de revisión periódica**
-- **Utilizar API para reportes personalizados**
-
-## Personal Health Dashboard
-
-El Personal Health Dashboard proporciona alertas y orientación cuando los eventos de AWS pueden afectar a su infraestructura.
-
-### Características Principales
-
-- **Alertas proactivas:** Notificaciones sobre problemas relevantes
-- **Dashboard personalizado:** Eventos que afectan específicamente sus recursos
-- **Visibilidad histórica:** Eventos pasados y su impacto
-- **Guía de remediación:** Pasos recomendados
-- **Integración con EventBridge:** Automatización de respuestas
-- **API access:** Programmatic notifications
-
-### Casos de Uso
-
-- **Monitoreo de estado de servicios**
-- **Planificación de mantenimiento**
-- **Correlación de problemas con eventos AWS**
-- **Comunicación con stakeholders durante incidentes**
-- **Automatización de respuestas a eventos planificados**
-
-### Mejores Prácticas
-
-- **Configurar notificaciones para servicios críticos**
-- **Integrar con sistemas de gestión de incidentes**
-- **Establecer procedimientos de escalamiento**
-- **Crear automatizaciones para eventos comunes**
-- **Documentar dependencias de servicios**
-
-## AWS Cost Explorer y AWS Budgets
-
-Herramientas para visualizar, gestionar y optimizar costos en AWS.
-
-### AWS Cost Explorer
-
-- **Visualización de costos:** Patrones históricos y previsiones
-- **Filtros granulares:** Por servicio, cuenta, tag, etc.
-- **Reports predefinidos:** Visiones comunes
-- **Recomendaciones:** Instancias reservadas, Savings Plans
-- **API access:** Integración con sistemas existentes
-
-### AWS Budgets
-
-- **Presupuestos de costos:** Límites de gasto
-- **Presupuestos de uso:** Límites de consumo
-- **Presupuestos de RI/SP:** Cobertura y utilización
-- **Alertas:** Notificaciones proactivas
-- **Acciones:** Respuestas automatizadas
-- **Informes:** Estado de presupuestos
-
-### Casos de Uso
-
-- **Control financiero:** Seguimiento y gestión de gastos
-- **Asignación de costos:** Atribución a unidades de negocio
-- **Optimización continua:** Identificación de ineficiencias
-- **Forecasting:** Proyección de costos futuros
-- **Chargeback/showback:** Facturación interna
-
-### Mejores Prácticas
-
-- **Implementar etiquetado consistente**
-- **Crear presupuestos por proyecto/departamento**
-- **Establecer alertas en múltiples umbrales**
-- **Revisar recomendaciones de RI/SP regularmente**
-- **Automatizar apagado de recursos no utilizados**
-- **Educar a equipos sobre implicaciones de costos**
-
-## AWS X-Ray
-
-X-Ray ayuda a analizar y depurar aplicaciones distribuidas, proporcionando una visión completa de las solicitudes a medida que viajan a través de la aplicación.
-
-### Componentes Principales
-
-- **Traces:** Registro del camino de una solicitud
-- **Segments:** Unidad de trabajo individual dentro de un trace
-- **Subsegments:** Trabajo detallado dentro de un segmento
-- **Service Graph:** Visualización de servicios y conexiones
-- **Groups:** Filtros para colecciones de traces
-- **Sampling:** Control de cantidad de datos recopilados
-- **Annotations & Metadata:** Información adicional para traces
-
-### Integración con Servicios AWS
-
-- **Lambda**
-- **API Gateway**
-- **AppSync**
-- **SNS/SQS**
-- **DynamoDB**
-- **Step Functions**
-- **Elastic Beanstalk**
-
-### Casos de Uso
-
-- **Troubleshooting de latencia:** Identificación de cuellos de botella
-- **Análisis de errores:** Identificación de fallos en la cadena
-- **Dependency analysis:** Mapeo de relaciones entre servicios
-- **Service mapping:** Descubrimiento de arquitectura real
-- **Performance optimization:** Mejora basada en datos reales
-
-### Mejores Prácticas
-
-- **Instrumentar todos los componentes críticos**
-- **Configurar grupos para tipos de solicitudes importantes**
-- **Ajustar reglas de muestreo según necesidades**
-- **Añadir anotaciones para filtrado eficiente**
-- **Integrar con CloudWatch para correlación**
-- **Implementar X-Ray en entornos de pre-producción**
-
-## Amazon Managed Service for Prometheus y Grafana
-
-Servicios gestionados para monitoreo y visualización de métricas para entornos de contenedores y microservicios.
-
-### Amazon Managed Service for Prometheus (AMP)
-
-- **Compatibilidad completa con Prometheus**
-- **Escalabilidad y alta disponibilidad gestionadas**
-- **Almacenamiento a largo plazo**
-- **Integración con EKS, ECS, EC2**
-- **Seguridad y cifrado integrados**
-- **PromQL para consultas**
-
-### Amazon Managed Grafana (AMG)
-
-- **Servicio gestionado para visualizaciones**
-- **Fuentes de datos múltiples (CloudWatch, AMP, etc.)**
-- **Dashboards interactivos**
-- **Alertas y notificaciones**
-- **Autenticación con IAM, SAML, etc.**
-- **Colaboración de equipos**
-
-### Casos de Uso
-
-- **Monitoreo de Kubernetes y contenedores**
-- **Observabilidad de microservicios**
-- **Métricas de aplicaciones personalizadas**
-- **Dashboards operacionales**
-- **Visualización de series temporales**
-
-### Mejores Prácticas
-
-- **Definir métricas con nombres consistentes**
-- **Organizar dashboards por servicio/equipo**
-- **Implementar alertas para métricas críticas**
-- **Utilizar etiquetas para filtrado eficiente**
-- **Balancear retención y costos**
-- **Documentar métricas y visualizaciones**
-
-## AWS Organizations y Control Tower
-
-Servicios para gestionar entornos AWS multi-cuenta a escala.
-
-### AWS Organizations
-
-- **Gestión centralizada de cuentas**
-- **Jerarquía organizacional con OUs**
-- **Service Control Policies (SCPs):** Control de permisos
-- **Consolidación de facturación**
-- **Integración con servicios AWS**
-- **Acceso entre cuentas**
-
-### AWS Control Tower
-
-- **Configuración automatizada de landing zone**
-- **Guardrails preventivos y detectivos**
-- **Dashboard de cumplimiento**
-- **Account Factory para aprovisionamiento**
-- **Integración con Directory Service**
-- **Logs centralizados**
-
-### Casos de Uso
-
-- **Segregación de entornos y cargas de trabajo**
-- **Aplicación de políticas de seguridad**
-- **Gobierno centralizado**
-- **Gestión financiera unificada**
-- **Delegación controlada de administración**
-
-### Mejores Prácticas
-
-- **Diseñar estructura organizacional antes de implementar**
-- **Implementar SCPs con enfoque de privilegio mínimo**
-- **Establecer cuentas dedicadas para seguridad y logs**
-- **Utilizar etiquetado consistente entre cuentas**
-- **Documentar y revisar periódicamente políticas**
-- **Implementar onboarding automatizado de cuentas**
-
-## Mejores Prácticas de Monitoreo en AWS
-
-### Estrategia Holística
-
-- **Observabilidad completa:** Métricas, logs, traces, eventos
-- **Enfoque por capas:** Infraestructura, plataforma, aplicación, negocio
-- **Automatización:** Reducción de tareas manuales
-- **Centralización:** Visión unificada
-- **Correlación:** Conexión entre diferentes señales
-
-### Definición de SLIs/SLOs
-
-- **Service Level Indicators:** Métricas que importan
-- **Service Level Objectives:** Metas de rendimiento
-- **Error budgets:** Margen aceptable de fallos
-- **Alertas basadas en SLOs:** Notificaciones significativas
-
-### Monitoreo Proactivo
-
-- **Detección de anomalías**
-- **Análisis de tendencias**
-- **Pruebas sintéticas**
-- **Monitoreo de experiencia de usuario**
-- **Alertas predictivas**
-
-### Cultura DevOps y SRE
-
-- **Ownership compartida**
-- **Aprendizaje de incidentes**
-- **Mejora continua**
-- **Automatización sobre reacción manual**
-- **Reducción de toil**
-
-## Arquitectura de Observabilidad para AWS
-
-### Recolección de Datos
-
-- **Agentes y sidecars**
-- **SDKs de instrumentación**
-- **Integraciones nativas**
-- **Formatos estándar (OpenTelemetry)**
-- **Muestreo inteligente**
-
-### Almacenamiento y Procesamiento
-
-- **Tiempo real vs. análisis histórico**
-- **Hot vs. warm vs. cold storage**
-- **Agregación y compresión**
-- **Retención basada en valor**
-
-### Visualización y Análisis
-
-- **Dashboards contextuales**
-- **Correlación entre señales**
-- **Drill-down capabilities**
-- **Análisis ad-hoc**
-- **Compartición y colaboración**
-
-### Respuesta a Alertas
-
-- **Clasificación por severidad**
-- **Enrutamiento inteligente**
-- **Contexto enriquecido**
-- **Automatización de respuesta**
-- **Aprendizaje post-incidente**
-
-## Tendencias Futuras
-
-- **AIOps:** Inteligencia artificial para operaciones
-- **Observabilidad distribuida:** Enfoque en sistemas complejos
-- **FinOps:** Confluencia de finanzas y operaciones
-- **Shift-left observability:** Integración en ciclo de desarrollo
-- **Continuous verification:** Validación constante de comportamiento
-- **Contextual awareness:** Enriquecimiento de señales con contexto empresarial
-
-## Conclusión
-
-Los servicios de monitoreo y gestión de AWS proporcionan un conjunto completo de herramientas para obtener visibilidad, control y automatización sobre entornos cloud de cualquier escala y complejidad. La implementación efectiva de estos servicios permite a las organizaciones no solo reaccionar rápidamente ante problemas, sino también anticiparse a ellos, optimizar continuamente y mejorar la confiabilidad general de sus sistemas.
-
-La tendencia clara en la evolución de estos servicios es hacia una mayor integración, automatización e inteligencia, permitiendo a los equipos enfocarse menos en tareas operativas manuales y más en innovación y mejora continua. Las organizaciones que adoptan un enfoque estratégico al monitoreo y gestión, aprovechando todo el potencial de estos servicios, pueden lograr mayor agilidad, confiabilidad y eficiencia en sus operaciones en la nube.
-
-## Referencias y Recursos Adicionales
-
-- [AWS Monitoring & Observability Documentation](https://aws.amazon.com/products/management-and-governance/)
-- [AWS Well-Architected Framework: Operational Excellence Pillar](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/)
-- [AWS Operations Guide](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html)
-- [CloudWatch User Guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/)
-- [AWS Systems Manager User Guide](https://docs.aws.amazon.com/systems-manager/latest/userguide/)
-- [AWS Management & Governance Blog](https://aws.amazon.com/blogs/mt/)
--
+## Escenario Real: OpsCorp - De "monitoréo manual" a observabilidad proactiva
+
+> **Empresa ficticia para ilustrar decisiones reales**
+
+OpsCorp es una empresa de e-commerce en Perú con 50 microservicios desplegados en ECS. Después de un incidente donde estuvieron 4 horas sin detectar que su sistema de pagos estaba caído (descubrieron por un tweet de cliente), deciden implementar una plataforma de observabilidad completa. Este capítulo sigue su transformación.
+
+---
+
+## Fase 1: Diagnóstico del Caos Actual (Semana 1)
+
+### El Problema
+- Logs dispersos en 50 contenedores diferentes
+- No hay métricas centralizadas
+- Alertas por email que nadie lee
+- "Monitoreo" = revisar manualmente cada hora
+- Cuando hay incidente: 30 min para identificar el servicio afectado
+
+### Análisis de Madurez Actual
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Nivel de Madurez de Observabilidad                        │
+│                                                             │
+│  Nivel 1: Reactive ─────► ✅ OpsCorp actual                  │
+│  Nivel 2: Proactive ────►                                  │
+│  Nivel 3: Predictive ───►                                  │
+│  Nivel 4: Autonomous ───►                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Métricas actuales (línea base):**
+| Métrica | Valor | Objetivo |
+|---------|-------|----------|
+| MTTD (Mean Time To Detect) | 30 min | < 5 min |
+| MTTR (Mean Time To Recover) | 2 horas | < 30 min |
+| Alertas falsas/mes | 200 | < 20 |
+| Cobertura de observabilidad | 15% | > 95% |
+
+---
+
+## Fase 2: Arquitectura de Observabilidad (Semana 2-3)
+
+### Decisiones de Diseño
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ¿Qué tipo de métricas necesitas recopilar?                  │
+│                                                               │
+│  Infraestructura AWS ───────► CloudWatch nativo             │
+│                                                               │
+│  Contenedores/K8s ──────────► CloudWatch Container Insights │
+│                         o AMP (Prometheus)                  │
+│                                                               │
+│  Aplicaciones custom ───────► CloudWatch Agent + SDK        │
+│                         o AWS Distro for OpenTelemetry      │
+│                                                               │
+│  Tracing distribuido ───────► X-Ray                         │
+│                         o OpenTelemetry + Jaeger/Zipkin     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Arquitectura Implementada
+
+```mermaid
+graph TB
+    subgraph "Capa de Ingesta"
+        A[Apps & Servicios] -->|Logs| B[CloudWatch Logs]
+        A -->|Métricas| C[CloudWatch Metrics]
+        A -->|Traces| D[X-Ray]
+        A -->|Eventos| E[EventBridge]
+    end
+    
+    subgraph "Capa de Procesamiento"
+        B -->|Filtros| F[Metric Filters]
+        C -->|Alarmas| G[CloudWatch Alarms]
+        E -->|Reglas| H[EventBridge Rules]
+    end
+    
+    subgraph "Capa de Acción"
+        G -->|SNS| I[Notificaciones]
+        G -->|Auto Scaling| J[Escalado]
+        H -->|Lambdas| K[Remediación]
+    end
+    
+    subgraph "Capa de Visualización"
+        L[CloudWatch Dashboards]
+        M[Grafana AMG]
+        N[CloudWatch Insights]
+    end
+    
+    B --> L
+    C --> L
+    D --> L
+    B --> N
+    C --> M
+
+    style A fill:#FF9900,color:#000
+    style G fill:#1E8900,color:#fff
+    style K fill:#d13212,color:#fff
+```
+
+---
+
+## Fase 3: Implementación Paso a Paso
+
+### Paso 1: Configuración Base de CloudWatch
+
+**CloudFormation - Configuración de Logs Centralizados:**
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'OpsCorp - CloudWatch Observability Stack'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+  RetentionDays:
+    Type: Number
+    Default: 30
+    Description: Días de retención de logs
+
+Resources:
+  # Grupos de Logs por Servicio
+  PaymentServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/opscorp/${Environment}/payment-service'
+      RetentionInDays: !Ref RetentionDays
+      KmsKeyId: !GetAtt LogEncryptionKey.Arn
+      Tags:
+        - Key: Service
+          Value: payment-service
+        - Key: Team
+          Value: payments
+        - Key: Criticality
+          Value: high
+
+  OrderServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/opscorp/${Environment}/order-service'
+      RetentionInDays: !Ref RetentionDays
+      Tags:
+        - Key: Service
+          Value: order-service
+        - Key: Team
+          Value: orders
+
+  InventoryServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/opscorp/${Environment}/inventory-service'
+      RetentionInDays: !Ref RetentionDays
+      Tags:
+        - Key: Service
+          Value: inventory-service
+        - Key: Team
+          Value: logistics
+
+  # Clave KMS para encriptación de logs
+  LogEncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for CloudWatch Logs encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow CloudWatch Logs
+            Effect: Allow
+            Principal:
+              Service: !Sub 'logs.${AWS::Region}.amazonaws.com'
+            Action:
+              - kms:Encrypt*
+              - kms:Decrypt*
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:Describe*
+            Resource: '*'
+
+  # Filtros métricos para errores críticos
+  PaymentErrorMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref PaymentServiceLogGroup
+      FilterPattern: '[level="ERROR", msg="*payment*failed*"]'
+      MetricTransformations:
+        - MetricNamespace: OpsCorp/Payments
+          MetricName: PaymentErrors
+          MetricValue: '1'
+          DefaultValue: 0
+          Dimensions:
+            - Key: Service
+              Value: payment-service
+            - Key: Environment
+              Value: !Ref Environment
+
+  # SNS Topic para notificaciones
+  OpsAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'opscorp-${Environment}-alerts'
+      DisplayName: OpsCorp Alerts
+      KmsMasterKeyId: !GetAtt LogEncryptionKey.Arn
+
+  # Subscription para equipo SRE
+  SRETeamSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref OpsAlertsTopic
+      Protocol: email
+      Endpoint: sre-team@opscorp.pe
+
+Outputs:
+  LogGroups:
+    Description: Created Log Groups
+    Value: !Join ",", [!Ref PaymentServiceLogGroup, !Ref OrderServiceLogGroup]
+  AlertTopicArn:
+    Description: SNS Topic for alerts
+    Value: !Ref OpsAlertsTopic
+    Export:
+      Name: !Sub '${AWS::StackName}-AlertTopic'
+```
+
+### Paso 2: Alarmas Inteligentes
+
+**Decision Tree - Estrategia de Alertas:**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ¿Cuándo debería activarse una alarma?                       │
+│                                                               │
+│  Latencia P99 > 2s ───────► CRÍTICO (Página on-call)         │
+│                                                               │
+│  Latencia P95 > 1s ───────► WARNING (Slack channel)          │
+│                                                               │
+│  Error rate > 1% ─────────► CRÍTICO                         │
+│                                                               │
+│  Error rate > 0.1% ───────► WARNING                         │
+│                                                               │
+│  CPU > 80% por 5 min ─────► AUTO-SCALING                     │
+│                                                               │
+│  CPU > 95% por 2 min ─────► WARNING + Escalar                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**CloudFormation - Alarmas con Detección de Anomalías:**
+
+```yaml
+  # Alarma de latencia P99 con anomalía
+  ApiLatencyP99Alarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'opscorp-${Environment}-api-latency-p99-high'
+      AlarmDescription: 'API P99 latency is anomalous'
+      MetricName: Latency
+      Namespace: AWS/ApplicationELB
+      Statistic: p99
+      Dimensions:
+        - Name: LoadBalancer
+          Value: !ImportValue ALBFullName
+      Period: 60
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 2
+      ThresholdMetricId: anomaly
+      ComparisonOperator: GreaterThanUpperThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref OpsAlertsTopic
+      OKActions:
+        - !Ref OpsAlertsTopic
+      Tags:
+        - Key: Severity
+          Value: critical
+        - Key: Service
+          Value: api-gateway
+
+  # Alarma de errores con math expression
+  ErrorRateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'opscorp-${Environment}-error-rate-high'
+      AlarmDescription: 'Error rate > 1% for 2 minutes'
+      Metrics:
+        - Id: errors
+          MetricStat:
+            Metric:
+              MetricName: HTTPCode_Target_5XX_Count
+              Namespace: AWS/ApplicationELB
+              Dimensions:
+                - Name: LoadBalancer
+                  Value: !ImportValue ALBFullName
+            Period: 60
+            Stat: Sum
+          ReturnData: false
+        - Id: total
+          MetricStat:
+            Metric:
+              MetricName: RequestCount
+              Namespace: AWS/ApplicationELB
+              Dimensions:
+                - Name: LoadBalancer
+                  Value: !ImportValue ALBFullName
+            Period: 60
+            Stat: Sum
+          ReturnData: false
+        - Id: error_rate
+          Expression: (errors / total) * 100
+          Label: ErrorRate
+          ReturnData: true
+      Threshold: 1
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 2
+      AlarmActions:
+        - !Ref OpsAlertsTopic
+
+  # Alarma compuesta - múltiples servicios
+  CompositeCriticalAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'opscorp-${Environment}-composite-critical'
+      AlarmDescription: 'Multiple critical services failing'
+      AlarmRule: |
+        ALARM(opscorp-${Environment}-payment-latency-high) AND 
+        ALARM(opscorp-${Environment}-order-errors-high)
+      AlarmActions:
+        - !Ref OpsAlertsTopic
+```
+
+### Paso 3: Dashboards Operacionales
+
+**CloudWatch Dashboard JSON (para importación):**
+
+```json
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Latencia P99 por Servicio",
+        "region": "us-east-1",
+        "metrics": [
+          ["AWS/ApplicationELB", "TargetResponseTime", 
+           "LoadBalancer", "app/opscorp-alb/123", 
+           {"stat": "p99", "label": "API Gateway"}],
+          ["...", {"stat": "p99", "label": "Payment Service"}],
+          ["...", {"stat": "p99", "label": "Order Service"}]
+        ],
+        "period": 60,
+        "yAxis": {
+          "left": {"min": 0, "max": 5}
+        },
+        "annotations": {
+          "horizontal": [
+            {"value": 2, "label": "SLO: 2s", "color": "#d13212"}
+          ]
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Tasa de Errores (5xx)",
+        "region": "us-east-1",
+        "metrics": [
+          [{"expression": "(m1/m2)*100", "label": "Error Rate %", "id": "e1"}],
+          ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", 
+           "LoadBalancer", "app/opscorp-alb/123", 
+           {"id": "m1", "visible": false}],
+          [".", "RequestCount", ".", ".", 
+           {"id": "m2", "visible": false}]
+        ],
+        "period": 60,
+        "yAxis": {
+          "left": {"min": 0, "max": 10}
+        }
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 6,
+      "width": 24,
+      "height": 6,
+      "properties": {
+        "title": "Errores en Tiempo Real",
+        "query": "SOURCE '/opscorp/production/payment-service' | SOURCE '/opscorp/production/order-service'\n| fields @timestamp, @message, level, service\n| filter level = 'ERROR'\n| sort @timestamp desc\n| limit 100",
+        "region": "us-east-1"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Fase 4: CloudWatch Insights y Troubleshooting
+
+### Queries de Análisis de Logs
+
+**Análisis de errores por servicio:**
+
+```sql
+-- Errores agrupados por servicio y tipo
+fields @timestamp, @message, service, errorType
+| filter level = 'ERROR'
+| parse @message "*Exception: *" as exceptionType, errorDetail
+| stats count(*) as errorCount by service, exceptionType
+| sort errorCount desc
+```
+
+**Análisis de latencia:**
+
+```sql
+-- Identificar requests lentos
+fields @timestamp, @message, responseTime, endpoint
+| filter responseTime > 2000
+| stats avg(responseTime) as avgLatency, 
+        max(responseTime) as maxLatency, 
+        count(*) as slowRequests 
+    by endpoint
+| sort avgLatency desc
+```
+
+**Correlación de errores:**
+
+```sql
+-- Encontrar patrones de errores en múltiples servicios
+SOURCE '/opscorp/production/payment-service'
+SOURCE '/opscorp/production/order-service'
+| fields @timestamp, @message, service, traceId
+| filter @message like /payment.*failed/ or @message like /order.*error/
+| stats earliest(@timestamp) as firstError, 
+        latest(@timestamp) as lastError 
+    by traceId
+| sort firstError asc
+```
+
+---
+
+## Fase 5: X-Ray para Tracing Distribuido
+
+### Instrumentación de Aplicación (Node.js)
+
+```javascript
+// app.js - Instrumentación X-Ray
+const AWSXRay = require('aws-xray-sdk-core');
+const AWS = AWSXRay.captureAWS(require('aws-sdk'));
+const express = require('express');
+
+const app = express();
+
+// Middleware de X-Ray
+app.use(AWSXRay.express.openSegment('PaymentService'));
+
+// Subsegmentos para operaciones críticas
+app.post('/api/payments', async (req, res) => {
+  const segment = AWSXRay.getSegment();
+  
+  // Subsegmento para validación
+  await segment.addNewSubsegmentAsync('validatePayment', async (subsegment) => {
+    subsegment.addAnnotation('userId', req.user.id);
+    subsegment.addMetadata('paymentAmount', req.body.amount);
+    
+    // Validación...
+    const isValid = await validatePayment(req.body);
+    subsegment.addAnnotation('isValid', isValid);
+    
+    if (!isValid) {
+      subsegment.addError('Payment validation failed');
+      throw new Error('Invalid payment');
+    }
+  });
+  
+  // Subsegmento para procesamiento
+  await segment.addNewSubsegmentAsync('processPayment', async (subsegment) => {
+    subsegment.addAnnotation('paymentMethod', req.body.method);
+    
+    try {
+      const result = await processWithProvider(req.body);
+      subsegment.addAnnotation('transactionId', result.id);
+      return result;
+    } catch (error) {
+      subsegment.addError(error);
+      throw error;
+    }
+  });
+  
+  res.json({ success: true });
+});
+
+app.use(AWSXRay.express.closeSegment());
+```
+
+### X-Ray Service Graph (visualización)
+
+```mermaid
+graph LR
+    A[API Gateway] -->|0.8s| B[Payment Service]
+    B -->|0.3s| C[DynamoDB]
+    B -->|0.4s| D[Payment Provider]
+    B -->|0.1s| E[SQS]
+    
+    style A fill:#FF9900
+    style B fill:#1E8900
+    style D fill:#d13212
+```
+
+---
+
+## Fase 6: CloudTrail y Auditoría
+
+### Configuración Multi-Cuenta
+
+```yaml
+  # Trail organizacional
+  OrgCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      TrailName: opscorp-org-trail
+      S3BucketName: !Ref CloudTrailBucket
+      IsMultiRegionTrail: true
+      EnableLogFileValidation: true
+      KMSKeyId: !GetAtt TrailEncryptionKey.Arn
+      EventSelectors:
+        - ReadWriteType: All
+          IncludeManagementEvents: true
+          DataResources:
+            - Type: AWS::S3::Object
+              Values:
+                - arn:aws:s3:::opscorp-sensitive-data/
+            - Type: AWS::Lambda::Function
+              Values:
+                - arn:aws:lambda:::function:opscorp-production-
+      InsightSelectors:
+        - InsightType: ApiCallRateInsight
+        - InsightType: ApiErrorRateInsight
+      Tags:
+        - Key: Purpose
+          Value: security-audit
+
+  # Alertas de CloudTrail con EventBridge
+  UnauthorizedAPICallsRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: unauthorized-api-calls
+      Description: Alert on unauthorized API calls
+      EventPattern:
+        source:
+          - aws.cloudtrail
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          errorCode:
+            - AccessDenied
+            - UnauthorizedOperation
+      Targets:
+        - Arn: !Ref OpsAlertsTopic
+          Id: SecurityTeam
+```
+
+---
+
+## Fase 7: AWS Config y Compliance
+
+### Reglas de Conformidad Automáticas
+
+```yaml
+  # Regla: S3 buckets deben estar encriptados
+  S3EncryptionRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: s3-bucket-server-side-encryption-enabled
+      Description: Verifies that S3 buckets have encryption enabled
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::S3::Bucket
+
+  # Regla: Security Groups sin reglas SSH abiertas
+  NoOpenSSHRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: restricted-ssh
+      Description: Checks that security groups don't have SSH open to 0.0.0.0/0
+      Source:
+        Owner: AWS
+        SourceIdentifier: INCOMING_SSH_DISABLED
+
+  # Conformance Pack (conjunto de reglas)
+  OpsCorpCompliancePack:
+    Type: AWS::Config::ConformancePack
+    Properties:
+      ConformancePackName: opscorp-security-baseline
+      TemplateBody: |
+        Resources:
+          S3BucketPublicReadProhibited:
+            Type: AWS::Config::ConfigRule
+            Properties:
+              ConfigRuleName: S3BucketPublicReadProhibited
+              Source:
+                Owner: AWS
+                SourceIdentifier: S3_BUCKET_PUBLIC_READ_PROHIBITED
+          
+          EC2VolumeEncryption:
+            Type: AWS::Config::ConfigRule
+            Properties:
+              ConfigRuleName: ec2-volume-inuse-check
+              Source:
+                Owner: AWS
+                SourceIdentifier: EC2_VOLUME_INUSE_CHECK
+              InputParameters:
+                Encrypted: "TRUE"
+
+  # Remediación automática
+  S3EncryptionRemediation:
+    Type: AWS::Config::RemediationConfiguration
+    Properties:
+      ConfigRuleName: !Ref S3EncryptionRule
+      Automatic: true
+      MaximumAutomaticAttempts: 3
+      RetryAttemptSeconds: 60
+      TargetId: AWSConfigRemediation-EnableS3BucketDefaultEncryption
+      TargetType: SSM_DOCUMENT
+      ResourceType: AWS::S3::Bucket
+```
+
+---
+
+## Costos y Optimización
+
+### Comparativa de Retención de Logs
+
+| Retención | Costo/GB/mes | Caso de Uso | Total/mes (100GB) |
+|-----------|--------------|-------------|-------------------|
+| 1 día | $0.50 | Debugging temporal | $50 |
+| 7 días | $0.50 | Desarrollo | $50 |
+| 30 días | $0.50 | Producción estándar | $50 |
+| 90 días | $0.50 + $0.03 (archivo) | Compliance básico | $53 |
+| 1 año | $0.50 + $0.03 | Auditoría | $53 |
+| 3 años | $0.50 + $0.03 | Compliance estricto | $53 |
+| S3 + Athena | $0.023 (S3) + $0.005 (consulta) | Análisis histórico | $2.3 + consultas |
+
+### Estrategia de Optimización de Costos
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Estrategia: Hot → Warm → Cold                               │
+│                                                              │
+│  Hot (CloudWatch Logs)                                       │
+│  ├── Últimos 7 días: $0.50/GB                               │
+│  ├── Búsquedas frecuentes                                   │
+│  └── Alertas en tiempo real                                 │
+│                                                              │
+│  Warm (S3 + Athena)                                         │
+│  ├── 7-90 días: $0.023/GB                                   │
+│  └── Consultas ocasionales                                  │
+│                                                              │
+│  Cold (S3 Glacier)                                          │
+│  ├── >90 días: $0.004/GB                                    │
+│  └── Solo para compliance                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### CloudFormation - Exportación a S3
+
+```yaml
+  LogExportToS3:
+    Type: AWS::Logs::SubscriptionFilter
+    DependsOn: LogDestinationPolicy
+    Properties:
+      LogGroupName: !Ref PaymentServiceLogGroup
+      FilterPattern: ''
+      DestinationArn: !GetAtt LogDestination.Arn
+
+  LogDestination:
+    Type: AWS::Logs::Destination
+    Properties:
+      DestinationName: opscorp-s3-export
+      RoleArn: !GetAtt LogsToS3Role.Arn
+      TargetArn: !GetAtt LogDeliveryStream.Arn
+      DestinationPolicy: !Sub |
+        {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Sid": "AllowLogSubscription",
+            "Effect": "Allow",
+            "Principal": {"AWS": "${AWS::AccountId}"},
+            "Action": "logs:PutSubscriptionFilter",
+            "Resource": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:destination:opscorp-s3-export"
+          }]
+        }
+```
+
+---
+
+## Troubleshooting Guide
+
+### Problema: "No llegan logs a CloudWatch"
+
+```bash
+# Checklist de diagnóstico
+
+# 1. Verificar IAM permissions
+curl http://169.254.169.254/latest/meta-data/iam/security-credentials/
+
+# 2. Verificar CloudWatch Agent está corriendo
+sudo systemctl status amazon-cloudwatch-agent
+
+# 3. Verificar configuración de agent
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+# 4. Verificar logs del propio agent
+sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log
+
+# 5. Probar put-log-events manualmente
+aws logs put-log-events \
+  --log-group-name test-group \
+  --log-stream-name test-stream \
+  --log-events timestamp=$(date +%s)000,message="test"
+```
+
+### Problema: "Alarmas no se disparan"
+
+| Síntoma | Causa Probable | Solución |
+|---------|----------------|----------|
+| Alarma siempre en INSUFFICIENT_DATA | No hay métricas | Verificar namespace y dimensions |
+| Alarma nunca dispara | Umbral incorrecto | Revisar estadística (Average vs Sum) |
+| Alarma dispara inmediatamente | Evaluation periods = 1 | Aumentar a 2-3 períodos |
+| Datos faltantes = alerta | TreatMissingData | Configurar como `notBreaching` |
+
+---
+
+## Checklist de Producción
+
+### Pre-Deploy
+- [ ] Log groups creados con tags consistentes
+- [ ] Retención configurada según compliance
+- [ ] KMS encryption habilitado para logs sensibles
+- [ ] Métricas personalizadas definidas
+- [ ] Alarmas con umbrales realistas (no spam)
+- [ ] SNS topics con múltiples canales (email + Slack + PagerDuty)
+- [ ] Dashboards creados para cada equipo
+- [ ] X-Ray instrumentado en servicios críticos
+- [ ] CloudTrail habilitado multi-región
+
+### Post-Deploy
+- [ ] Verificar logs llegan correctamente
+- [ ] Testear alarmas manualmente
+- [ ] Validar dashboards muestran datos
+- [ ] Confirmar X-Ray traces completos
+- [ ] Revisar costos de ingestión de logs
+- [ ] Documentar runbooks de alertas
+
+---
+
+## Ejercicios Prácticos
+
+### Ejercicio 1: Dashboard Personalizado
+Crear un dashboard de CloudWatch que muestre:
+- Latencia P50, P95, P99 de tu aplicación
+- Requests por minuto
+- Errores 5xx y 4xx
+- Costo estimado del servicio
+
+### Ejercicio 2: Query de Logs Avanzada
+Escribir una query de CloudWatch Insights que:
+- Identifique los 10 endpoints más lentos
+- Muestre la distribución de errores por hora
+- Correlacione errores con deployment times
+
+### Ejercicio 3: Automatización de Remediación
+Crear un EventBridge rule que:
+- Detecte cuando una instancia EC2 tiene CPU > 90%
+- Ejecute un Systems Manager Automation
+- Recolecte logs de diagnóstico
+- Envíe notificación al equipo
+
+---
+
+## Resultados Obtenidos por OpsCorp
+
+| Métrica | Antes | Después | Mejora |
+|---------|-------|---------|--------|
+| MTTD | 30 min | 2 min | 93% |
+| MTTR | 2 horas | 15 min | 87% |
+| Alertas falsas/mes | 200 | 12 | 94% |
+| Cobertura observabilidad | 15% | 98% | 553% |
+| Costo mensual logs | - | $450 | - |
+| Incidentes detectados proactivamente | 20% | 85% | 325% |
+
+**ROI de la implementación:**
+- Costo anual de plataforma: $5,400
+- Horas de ingeniería ahorradas: 40h/mes × $50/h = $24,000/año
+- Downtime evitado: ~$100,000 en ventas protegidas
+- **Payback: < 1 mes**

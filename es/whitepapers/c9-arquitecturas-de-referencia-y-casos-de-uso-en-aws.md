@@ -1,953 +1,116 @@
 # Capítulo 9: Arquitecturas de Referencia y Casos de Uso en AWS
 
-## Resumen Ejecutivo
-
-La implementación exitosa de soluciones en la nube requiere un diseño arquitectónico sólido que aproveche adecuadamente los servicios y capacidades de AWS. Este whitepaper presenta un conjunto integral de arquitecturas de referencia y casos de uso probados en entornos de producción, ofreciendo patrones de diseño, mejores prácticas y consideraciones para diversos escenarios empresariales. Estas arquitecturas de referencia sirven como punto de partida para acelerar el desarrollo de soluciones, mitigar riesgos y optimizar costos, facilitando la adopción exitosa de AWS en cualquier organización. La comprensión de estos patrones arquitectónicos es fundamental para diseñadores de sistemas, arquitectos de soluciones y tomadores de decisiones tecnológicas que buscan maximizar el valor de su inversión en la nube.
-
-## Fundamentos de Arquitectura en AWS
-
-### AWS Well-Architected Framework
-
-El AWS Well-Architected Framework proporciona las bases para crear infraestructuras eficientes y seguras. Se basa en seis pilares:
-
-1. **Excelencia Operativa:** Capacidad para ejecutar y monitorear sistemas
-2. **Seguridad:** Protección de información y sistemas
-3. **Fiabilidad:** Capacidad para recuperarse de interrupciones
-4. **Eficiencia de Rendimiento:** Uso eficiente de recursos
-5. **Optimización de Costos:** Evitar gastos innecesarios
-6. **Sostenibilidad:** Minimizar impacto ambiental
-
-### Principios de Diseño Fundamentales
-
-- **Diseño para fallos:** Asumir que cualquier componente puede fallar
-- **Desacoplamiento de componentes:** Reducir interdependencias
-- **Implementación de defensa en profundidad:** Múltiples capas de seguridad
-- **Automatización:** Reducir intervención manual
-- **Evolución constante:** Diseño para el cambio
-- **Basado en datos:** Decisiones fundamentadas en métricas
-
-### Patrones de Arquitectura Comunes
-
-- **Multi-capa:** Separación de presentación, lógica y datos
-- **Microservicios:** Descomposición en servicios pequeños y especializados
-- **Serverless:** Ejecución de código sin gestionar servidores
-- **Event-driven:** Comunicación basada en eventos
-- **Distribuido:** Diseño para escala horizontal
-
-## Arquitecturas para Aplicaciones Web
-
-### Aplicación Web de 2 Niveles
-
-**Descripción:** Arquitectura básica con capa web y base de datos.
-
-**Componentes:**
-- Amazon EC2 o Elastic Beanstalk para capa web
-- Amazon RDS para base de datos
-- Elastic Load Balancing para distribución de tráfico
-- Auto Scaling para ajuste de capacidad
-
-**Casos de Uso:**
-- Aplicaciones pequeñas a medianas
-- Prototipos y entornos de desarrollo
-- Migración lift-and-shift inicial
-
-**Consideraciones:**
-- Punto único de fallo si no se implementa Multi-AZ
-- Escalabilidad limitada para aplicaciones muy grandes
-- Acoplamiento potencial entre componentes
-
-### Aplicación Web de 3 Niveles
-
-**Descripción:** Arquitectura que separa presentación, lógica de negocio y datos.
-
-**Componentes:**
-- ELB/ALB para balanceo de carga
-- EC2 o ECS para capa web (nivel 1)
-- EC2, ECS o Elastic Beanstalk para capa de aplicación (nivel 2)
-- RDS o Aurora para capa de datos (nivel 3)
-- ElastiCache para caché de sesión/datos
-- Auto Scaling en cada nivel
-
-**Casos de Uso:**
-- Aplicaciones empresariales
-- E-commerce
-- CMS y portales corporativos
-
-**Consideraciones:**
-- Mayor complejidad operativa
-- Mayor flexibilidad para escalar componentes independientes
-- Mejora en resiliencia y disponibilidad
-
-### Arquitectura Web Serverless
-
-**Descripción:** Aplicaciones web sin gestión de servidores.
-
-**Componentes:**
-- Amazon CloudFront para distribución de contenido
-- Amazon S3 para contenido estático
-- AWS Lambda para lógica de backend
-- Amazon API Gateway para APIs
-- Amazon DynamoDB para almacenamiento de datos
-- Amazon Cognito para autenticación
-
-**Casos de Uso:**
-- Aplicaciones con tráfico variable
-- Startups con restricciones de personal de operaciones
-- APIs y microservicios
-- Sitios web estáticos con funcionalidad dinámica
-
-**Consideraciones:**
-- Costos basados en uso en lugar de capacidad
-- Límites de tiempo de ejecución en funciones Lambda
-- Cambio de paradigma en desarrollo y operaciones
-
-### Aplicación Web Containerizada
-
-**Descripción:** Aplicaciones empaquetadas en contenedores para consistencia y portabilidad.
-
-**Componentes:**
-- Amazon ECS o EKS para orquestación de contenedores
-- AWS Fargate para ejecución sin servidor
-- ECR para registro de imágenes
-- ALB para enrutamiento
-- Aurora o RDS para datos
-- EFS para almacenamiento persistente
-
-**Casos de Uso:**
-- Microservicios
-- Aplicaciones modernas cloud-native
-- DevOps con CI/CD avanzado
-- Portabilidad entre entornos
-
-**Consideraciones:**
-- Necesidad de estrategia de gestión de contenedores
-- Curva de aprendizaje para Kubernetes (si se usa EKS)
-- Beneficios en estandarización y despliegue
-
-## Arquitecturas para Análisis de Datos
-
-### Data Lake
-
-**Descripción:** Repositorio centralizado para almacenar datos estructurados y no estructurados a cualquier escala.
-
-**Componentes:**
-- Amazon S3 para almacenamiento de datos brutos
-- AWS Glue para catalogación y ETL
-- Amazon Athena para consultas SQL
-- Amazon QuickSight para visualización
-- AWS Lake Formation para gestión de acceso
-- Amazon EMR para procesamiento a gran escala
-
-**Casos de Uso:**
-- Consolidación de múltiples fuentes de datos
-- Análisis exploratorio
-- Machine Learning
-- Procesamiento de logs y eventos
-
-**Consideraciones:**
-- Gobernanza de datos
-- Estrategia de particionamiento
-- Costos de almacenamiento y escaneo
-
-### Almacén de Datos (Data Warehouse)
-
-**Descripción:** Repositorio optimizado para análisis de datos empresariales.
-
-**Componentes:**
-- Amazon Redshift para almacenamiento y análisis
-- AWS Glue o AWS Data Pipeline para ETL
-- Amazon S3 para almacenamiento intermedio
-- Redshift Spectrum para consultas de datos en S3
-- QuickSight para BI y visualización
-
-**Casos de Uso:**
-- Business Intelligence
-- Informes corporativos
-- Análisis histórico
-- Consolidación de datos transaccionales
-
-**Consideraciones:**
-- Modelado dimensional
-- Estrategia de claves de distribución y ordenación
-- Tamaño y tipo de nodo
-- Gestión de concurrencia
-
-### Arquitectura de Procesamiento en Tiempo Real
-
-**Descripción:** Sistema para procesamiento y análisis de datos en tiempo real.
-
-**Componentes:**
-- Amazon Kinesis Data Streams para ingesta
-- Amazon Kinesis Data Analytics para procesamiento
-- Amazon Kinesis Data Firehose para entrega
-- AWS Lambda para transformaciones
-- Amazon ElastiCache o DynamoDB para estado
-- Amazon MSK (Kafka) para casos avanzados
-
-**Casos de Uso:**
-- Análisis de clickstream
-- Monitoreo de IoT
-- Detección de fraude en tiempo real
-- Paneles de control en vivo
-
-**Consideraciones:**
-- Latencia vs throughput
-- Estrategia de particionamiento
-- Manejo de datos fuera de orden
-- Recuperación ante fallos
-
-### Arquitectura de Machine Learning
-
-**Descripción:** Infraestructura para desarrollo, entrenamiento y despliegue de modelos ML.
-
-**Componentes:**
-- Amazon SageMaker para ciclo completo de ML
-- Amazon S3 para almacenamiento de datos y modelos
-- AWS Glue para preparación de datos
-- Amazon EMR para procesamiento a gran escala
-- Amazon ECR para contenedores de modelos
-- AWS Lambda o SageMaker Endpoints para inferencia
-
-**Casos de Uso:**
-- Sistemas de recomendación
-- Detección de anomalías
-- Análisis de sentimiento
-- Visión por computadora
-- Previsión
-
-**Consideraciones:**
-- Ciclo de vida de modelos
-- Estrategia de entrenamiento distribuido
-- Optimización de costos de entrenamiento vs inferencia
-- Monitoreo de modelos en producción
-
-## Arquitecturas para Aplicaciones Empresariales
-
-### Infraestructura de Escritorio Virtual (VDI)
-
-**Descripción:** Escritorios Windows o Linux virtualizados y accesibles remotamente.
-
-**Componentes:**
-- Amazon WorkSpaces para escritorios virtuales
-- Amazon AppStream 2.0 para streaming de aplicaciones
-- AWS Directory Service para autenticación
-- Amazon FSx para almacenamiento de perfil/datos
-- Amazon VPC para aislamiento de red
-- AWS Systems Manager para gestión
-
-**Casos de Uso:**
-- Trabajo remoto seguro
-- Contratistas y terceros
-- Fusiones y adquisiciones
-- Entornos regulados
-- Laboratorios de formación
-
-**Consideraciones:**
-- Experiencia de usuario y latencia
-- Licenciamiento
-- Perfiles de almacenamiento
-- Opciones de tamaño/rendimiento
-
-### Entorno SAP en AWS
-
-**Descripción:** Implementación de SAP ERP y sistemas relacionados en AWS.
-
-**Componentes:**
-- EC2 para servidores de aplicación SAP
-- Instancias certificadas para SAP HANA
-- Amazon EBS y FSx para almacenamiento
-- Amazon S3 para backups
-- AWS Direct Connect para conectividad híbrida
-- AWS Backup para copias de seguridad
-
-**Casos de Uso:**
-- Migración de SAP ECC o S/4HANA
-- Entornos de desarrollo y pruebas
-- DR para SAP on-premises
-- Expansión de SAP a nuevas regiones
-
-**Consideraciones:**
-- Dimensionamiento adecuado
-- Alta disponibilidad
-- Estrategia de backup/restore
-- Plan de migración
-- Entorno híbrido
-
-### Arquitectura para Contact Center
-
-**Descripción:** Centro de contacto omnicanal basado en la nube.
-
-**Componentes:**
-- Amazon Connect para plataforma de contact center
-- Amazon Lex para chatbots e IVR
-- Amazon Polly para text-to-speech
-- Amazon Transcribe para speech-to-text
-- Amazon Comprehend para análisis de sentimiento
-- Amazon Kinesis para streaming de datos
-- Amazon S3 y Athena para análisis
-
-**Casos de Uso:**
-- Centros de atención al cliente
-- Soporte técnico
-- Ventas telefónicas
-- Sistemas de autoservicio
-- Virtualización de call centers
-
-**Consideraciones:**
-- Integración con CRM
-- Enrutamiento y colas
-- Análisis de calidad
-- Continuidad de servicio
-- Gestión de picos de demanda
-
-### Arquitectura de Colaboración y Productividad
-
-**Descripción:** Plataforma integral para comunicación y colaboración empresarial.
-
-**Componentes:**
-- Amazon WorkDocs para gestión documental
-- Amazon WorkMail para correo y calendario
-- Amazon Chime para reuniones y chat
-- Amazon AppStream 2.0 para aplicaciones
-- AWS IAM y Directory Service para identidad
-- Amazon S3 para almacenamiento
-
-**Casos de Uso:**
-- Equipos distribuidos
-- Reemplazo de soluciones on-premises
-- Colaboración segura con externos
-- Entornos regulados
-
-**Consideraciones:**
-- Experiencia de usuario
-- Integración con dispositivos
-- Cumplimiento normativo
-- Migración desde sistemas existentes
-
-## Arquitecturas para Alta Disponibilidad y Recuperación ante Desastres
-
-### Arquitectura Multi-AZ
-
-**Descripción:** Despliegue entre múltiples zonas de disponibilidad para alta disponibilidad.
-
-**Componentes:**
-- Múltiples subredes en diferentes AZs
-- Auto Scaling entre AZs
-- ELB para distribución de tráfico
-- RDS o Aurora Multi-AZ
-- Réplicas de lectura para bases de datos
-- Configuración activo-activo o activo-pasivo
-
-**Casos de Uso:**
-- Aplicaciones críticas para el negocio
-- Servicios que requieren SLA alto
-- Protección contra fallos de infraestructura
-
-**Consideraciones:**
-- Costos adicionales
-- Consistencia de datos
-- Latencia entre zonas
-- Estrategia de pruebas de conmutación
-
-### Arquitectura Multi-Región
-
-**Descripción:** Despliegue en múltiples regiones AWS para resiliencia global.
-
-**Componentes:**
-- Despliegue independiente en cada región
-- Route 53 para DNS global
-- DynamoDB Global Tables o Aurora Global Database
-- S3 Cross-Region Replication
-- CloudFront para distribución global
-- AWS Backup para copias de seguridad entre regiones
-
-**Casos de Uso:**
-- Recuperación ante desastres regionales
-- Cumplimiento con requisitos de residencia de datos
-- Optimización del rendimiento global
-- Continuidad de negocio
-
-**Consideraciones:**
-- Complejidad significativa
-- Consistencia eventual entre regiones
-- Costos de transferencia de datos
-- Gestión de identidades entre regiones
-- Estrategia de despliegue coordinado
-
-### Warm Standby
-
-**Descripción:** Mantener un entorno secundario reducido pero funcional que puede escalar rápidamente.
-
-**Componentes:**
-- Entorno principal completo
-- Entorno secundario con capacidad reducida
-- Replicación continua de datos
-- Route 53 para failover
-- Automatización para escalar el secundario
-
-**Casos de Uso:**
-- Balance entre costos y RTO
-- Aplicaciones con tolerancia a cierta interrupción
-- Recursos con costos elevados
-
-**Consideraciones:**
-- Tiempo de escalado del secundario
-- Pruebas regulares de conmutación
-- Procesos de sincronización de datos
-- Automatización de conmutación
-
-### Pilot Light
-
-**Descripción:** Mantener solo los componentes críticos activos y el resto apagados hasta necesitarlos.
-
-**Componentes:**
-- Replicación de datos críticos
-- Infraestructura mínima en espera
-- AMIs y configuraciones preparadas
-- Automatización para aprovisionamiento
-- Procedimientos para activación
-
-**Casos de Uso:**
-- Optimización de costos de DR
-- Sistemas con RTO flexible
-- Entornos grandes con componentes críticos identificados
-
-**Consideraciones:**
-- Mayor RTO que warm standby
-- Procesos robustos de activación
-- Pruebas de recuperación completas
-- Mantenimiento de configuraciones actualizadas
-
-## Arquitecturas para Seguridad y Cumplimiento
-
-### Arquitectura de Seguridad por Defecto
-
-**Descripción:** Implementación base de seguridad para cualquier carga de trabajo en AWS.
-
-**Componentes:**
-- AWS Organizations para gestión multi-cuenta
-- VPC con segmentación adecuada
-- Security Groups y NACLs restrictivos
-- AWS Config para evaluación continua
-- CloudTrail para auditoría
-- GuardDuty para detección de amenazas
-- IAM con privilegio mínimo
-- KMS para cifrado
-
-**Casos de Uso:**
-- Base para cualquier implementación
-- Entornos con datos sensibles
-- Cumplimiento normativo básico
-
-**Consideraciones:**
-- Balance entre seguridad y usabilidad
-- Procesos de excepción
-- Monitoreo continuo
-- Automatización de remediación
-
-### Arquitectura para Cargas de Trabajo Reguladas
-
-**Descripción:** Implementación que cumple con requisitos normativos específicos.
-
-**Componentes:**
-- Arquitectura de seguridad por defecto
-- AWS Artifact para documentación de cumplimiento
-- AWS Control Tower para gobernanza
-- VPC dedicadas y aisladas
-- Cifrado end-to-end
-- AWS WAF y Shield para protección
-- AWS Config para reglas de conformidad
-- Amazon Macie para datos sensibles
-- AWS Security Hub para visión unificada
-
-**Casos de Uso:**
-- PCI DSS
-- HIPAA
-- GDPR
-- Servicios financieros regulados
-- Información gubernamental
-
-**Consideraciones:**
-- Documentación exhaustiva
-- Controles compensatorios
-- Segregación de entornos
-- Planes de auditoría
-- Formación especializada
-
-### Landing Zone Empresarial
-
-**Descripción:** Fundación para despliegue seguro, escalable y consistente de cargas de trabajo.
-
-**Componentes:**
-- AWS Control Tower o solución personalizada
-- Estructura multi-cuenta
-- AWS Organizations con SCPs
-- Redes centralizadas con Transit Gateway
-- Logging centralizado
-- IAM Identity Center para gestión de identidades
-- Guardrails para compliance
-- Automatización de aprovisionamiento
-
-**Casos de Uso:**
-- Organizaciones grandes
-- Entornos multi-equipo
-- Necesidades estrictas de gobernanza
-- Gestión de costos centralizada
-
-**Consideraciones:**
-- Complejidad inicial
-- Equilibrio entre control central y autonomía
-- Gestión del cambio organizativo
-- Procesos de excepción
-
-### Zero Trust en AWS
-
-**Descripción:** Implementación del principio "nunca confiar, siempre verificar" en AWS.
-
-**Componentes:**
-- AWS IAM con políticas restrictivas
-- AWS Network Firewall
-- AWS PrivateLink para conexiones privadas
-- AWS AppStream para acceso a aplicaciones
-- AWS Certificate Manager para identidad
-- Amazon Verified Permissions para autorización
-- AWS CloudHSM para material criptográfico
-- VPC Endpoints para servicios AWS
-
-**Casos de Uso:**
-- Entornos de alta seguridad
-- Protección de datos críticos
-- Defensa contra amenazas internas
-- Cumplimiento de requisitos de seguridad avanzados
-
-**Consideraciones:**
-- Complejidad operativa
-- Posible impacto en experiencia de usuario
-- Requisitos de visibilidad completa
-- Gestión de excepciones
-
-## Arquitecturas para Cargas de Trabajo Específicas
-
-### WordPress Escalable y de Alta Disponibilidad
-
-**Descripción:** Plataforma WordPress optimizada para rendimiento, disponibilidad y seguridad.
-
-**Componentes:**
-- Auto Scaling para servidores web
-- Amazon Aurora para base de datos
-- ElastiCache para caché de objetos
-- EFS para almacenamiento compartido
-- CloudFront para CDN
-- WAF para seguridad
-- CloudWatch para monitoreo
-
-**Casos de Uso:**
-- Sitios de medios de alto tráfico
-- Blogs corporativos críticos
-- Plataformas de publicación
-- CMS empresariales basados en WordPress
-
-**Consideraciones:**
-- Estrategia de caché multinivel
-- Gestión de plugins
-- Proceso de actualización seguro
-- Respaldo y recuperación
-
-### Arquitectura DevOps
-
-**Descripción:** Infraestructura para implementar prácticas DevOps completas.
-
-**Componentes:**
-- AWS CodePipeline para orquestación CI/CD
-- AWS CodeCommit o GitHub para repositorios
-- AWS CodeBuild para compilación y pruebas
-- AWS CodeDeploy para despliegue
-- AWS CloudFormation o CDK para IaC
-- AWS CodeStar para gestión de proyectos
-- Amazon ECR para imágenes de contenedores
-- CloudWatch para monitoreo y logs
-
-**Casos de Uso:**
-- Desarrollo ágil
-- Integración y despliegue continuos
-- Automatización de infraestructura
-- Equipos con prácticas DevOps
-
-**Consideraciones:**
-- Cultura y procesos
-- Estrategia de branching
-- Pruebas automatizadas
-- Seguridad en el pipeline
-
-### Arquitectura IoT
-
-**Descripción:** Plataforma para conexión, gestión y análisis de dispositivos IoT.
-
-**Componentes:**
-- AWS IoT Core para conectividad
-- AWS IoT Device Management para gestión
-- AWS IoT Analytics para análisis
-- AWS IoT Events para detección de eventos
-- Amazon Kinesis para streaming
-- Amazon Timestream para series temporales
-- Lambda para procesamiento
-- DynamoDB para almacenamiento
-
-**Casos de Uso:**
-- Industria 4.0
-- Edificios inteligentes
-- Flotas conectadas
-- Monitoreo remoto
-- Ciudades inteligentes
-
-**Consideraciones:**
-- Seguridad de dispositivos
-- Conectividad intermitente
-- Volumen de datos
-- Latencia
-- Gestión del ciclo de vida
-
-### Arquitectura para Gaming
-
-**Descripción:** Infraestructura para juegos online con escalabilidad global y baja latencia.
-
-**Componentes:**
-- GameLift para servidores de juegos
-- DynamoDB global para datos
-- ElastiCache para estado en memoria
-- API Gateway para servicios
-- Lambda para lógica sin servidor
-- Amazon Cognito para autenticación
-- CloudFront para distribución
-- Kinesis para analítica en tiempo real
-
-**Casos de Uso:**
-- Juegos multijugador masivos
-- Juegos móviles con componente online
-- Plataformas de juego como servicio
-- Servidores dedicados
-
-**Consideraciones:**
-- Latencia crítica
-- Escalado rápido para eventos
-- Protección DDoS
-- Persistencia de estado
-- Matchmaking
-
-## Tendencias y Arquitecturas Emergentes
-
-### Arquitectura de Malla de Servicios (Service Mesh)
-
-**Descripción:** Capa de infraestructura para gestionar comunicación entre microservicios.
-
-**Componentes:**
-- Amazon EKS o ECS para contenedores
-- AWS App Mesh o tecnologías como Istio
-- Envoy como proxy de servicio
-- CloudMap para descubrimiento
-- X-Ray para trazabilidad
-- CloudWatch para monitoreo
-
-**Casos de Uso:**
-- Arquitecturas de microservicios complejas
-- Requisitos avanzados de enrutamiento
-- Observabilidad profunda
-- Estrategias de despliegue avanzadas
-
-**Consideraciones:**
-- Complejidad adicional
-- Overhead de rendimiento
-- Curva de aprendizaje
-- Madurez tecnológica
-
-### Arquitectura Sin Estado (Stateless)
-
-**Descripción:** Diseño donde los componentes no mantienen información de estado entre solicitudes.
-
-**Componentes:**
-- Lambda o Fargate para procesamiento
-- API Gateway para gestión de APIs
-- DynamoDB o Aurora serverless para datos
-- S3 para almacenamiento
-- ElastiCache para caché compartido
-- Cognito para gestión de sesión
-
-**Casos de Uso:**
-- Aplicaciones altamente escalables
-- Sistemas distribuidos
-- Arquitecturas cloud-native
-- Procesamiento por eventos
-
-**Consideraciones:**
-- Rediseño de aplicaciones tradicionales
-- Gestión de identidad y sesión
-- Consistencia de datos
-- Patrones de comunicación
-
-### Edge Computing en AWS
-
-**Descripción:** Procesamiento y almacenamiento más cercano a usuarios finales o fuentes de datos.
-
-**Componentes:**
-- AWS Wavelength para integración con redes 5G
-- AWS Outposts para infraestructura AWS local
-- AWS Local Zones para latencia reducida
-- Lambda@Edge para procesamiento en CDN
-- CloudFront para distribución global
-- IoT Greengrass para edge computing en dispositivos
-
-**Casos de Uso:**
-- Aplicaciones sensibles a latencia
-- Procesamiento local de datos IoT
-- Gaming y streaming
-- AR/VR
-- Aplicaciones industriales
-
-**Consideraciones:**
-- Sincronización con la nube
-- Gestión de dispositivos distribuidos
-- Disponibilidad limitada geográfica
-- Estrategias híbridas
-- Seguridad en entornos distribuidos
-
-### Arquitectura de IA Generativa
-
-**Descripción:** Infraestructura para desarrollo y despliegue de modelos de IA generativa a escala.
-
-**Componentes:**
-- Amazon SageMaker para entrenamiento e inferencia
-- EC2 con aceleradores (P4/P5) para computación
-- Amazon S3 para almacenamiento de datos y modelos
-- Amazon Bedrock para modelos pre-entrenados
-- AWS Batch para procesamiento masivo
-- API Gateway para interfaces de usuario
-- Lambda para orquestación
-
-**Casos de Uso:**
-- Generación de contenido (texto, imagen, audio)
-- Asistentes virtuales avanzados
-- Automatización de creatividad
-- Resumen y análisis de documentos
-- Traducción avanzada
-
-**Consideraciones:**
-- Requerimientos computacionales intensivos
-- Costos de entrenamiento e inferencia
-- Consideraciones éticas y de sesgo
-- Control de calidad del contenido generado
-- Escalabilidad para producción
-
-## Optimización de Arquitecturas
-
-### Revisión de Arquitectura
-
-Para cualquier arquitectura implementada, es esencial realizar revisiones periódicas considerando:
-
-- **Well-Architected Reviews:** Evaluación basada en los seis pilares
-- **Mejora continua:** Iteración basada en métricas y retroalimentación
-- **Evolución tecnológica:** Incorporación de nuevos servicios y capacidades
-- **Cambios en requisitos:** Adaptación a nuevas necesidades de negocio
-- **Optimización de costos:** Análisis de utilización y costos
-
-### Estrategias de Optimización Comunes
-
-- **Right-sizing:** Ajuste de recursos a necesidades reales
-- **Serverless-first:** Considerar opciones sin servidor antes que VMs
-- **Automatización:** Reducir intervención manual para consistencia y eficiencia
-- **Monitoreo proactivo:** Detección temprana de problemas
-- **Pruebas de resiliencia:** Chaos engineering y simulación de fallos
-- **Adopción de patrones emergentes:** Incorporación de nuevas prácticas
-
-## Consideraciones Multi-Nube e Híbridas
-
-### Arquitecturas Híbridas
-
-**Descripción:** Combinación de recursos en AWS y entornos on-premises.
-
-**Componentes:**
-- AWS Direct Connect para conectividad dedicada
-- VPN para conexiones seguras
-- AWS Storage Gateway para integración de almacenamiento
-- AWS DataSync para migración de datos
-- AWS Outposts para AWS en instalaciones propias
-- AWS Systems Manager para gestión unificada
-
-**Casos de Uso:**
-- Migración gradual a la nube
-- Regulaciones de residencia de datos
-- Aplicaciones legacy difíciles de migrar
-- Recuperación ante desastres
-
-**Consideraciones:**
-- Consistencia operativa
-- Latencia entre entornos
-- Seguridad de conexiones
-- Modelos de costos mixtos
-
-### Estrategias Multi-Nube
-
-**Descripción:** Utilización de AWS junto con otros proveedores de nube.
-
-**Componentes:**
-- Contenedores para portabilidad
-- Herramientas de orquestación cross-cloud
-- Redes de malla global
-- Gestión de identidad federada
-- APIs abstractas
-- Automatización multi-plataforma
-
-**Casos de Uso:**
-- Prevención de dependencia de proveedor
-- Aprovechamiento de fortalezas específicas
-- Requisitos regulatorios
-- Adquisiciones y fusiones
-
-**Consideraciones:**
-- Complejidad operativa significativa
-- Consistencia de seguridad
-- Habilidades diversificadas
-- Gestión de costos entre nubes
-- Gobernanza unificada
-
-## Implementación de Arquitecturas de Referencia
-
-### Enfoque Metodológico
-
-Para implementar con éxito las arquitecturas de referencia:
-
-1. **Evaluación de requisitos:** Alinear arquitectura con necesidades reales
-2. **Personalización:** Adaptar la arquitectura de referencia al contexto específico
-3. **Iteración incremental:** Comenzar con MVP y evolucionar
-4. **Automatización:** Implementar como código (IaC)
-5. **Validación:** Pruebas y verificación contra requisitos
-6. **Documentación:** Registrar decisiones y configuraciones
-7. **Capacitación:** Formar al equipo en la nueva arquitectura
-
-### Herramientas de Implementación
-
-- **AWS CloudFormation:** Definición declarativa de infraestructura
-- **AWS CDK:** Definición programática usando lenguajes familiares
-- **Terraform:** Herramienta multi-cloud para infraestructura
-- **AWS Service Catalog:** Catálogo de soluciones aprobadas
-- **AWS Solutions Constructs:** Patrones de arquitectura pre-definidos
-- **AWS Solutions Library:** Soluciones completas para casos de uso comunes
-
-## Casos de Éxito Reales de Arquitecturas AWS
-
-### Netflix: Arquitectura de Streaming Global
-
-**Contexto:** Servir 230+ millones de usuarios con contenido de alta calidad, con latencia mínima y disponibilidad del 99.99%.
-
-**Arquitectura Implementada:**
-- **CDN Global:** CloudFront con 450+ PoPs distribuidos estratégicamente
-- **Microservicios:** Más de 1,000 microservicios en contenedores
-- **Data:** Cassandra, EVCache, S3 para diferentes capas de datos
-- **Compute:** EC2 Auto Scaling Groups con Spot Instances
-- **Orchestration:** Plataforma de orquestación propia (converging to Kubernetes)
-
-**Resultados Clave:**
-- Tiempo de inicio de video reducido a menos de 2 segundos
-- Capacidad de manejar picos de 37% del tráfico de internet en horas pico
-- Despliegues 1,000+ veces por día sin downtime
-- Resiliencia ante fallos de región completa
-
-**Lecciones:** El desacoplamiento completo permite evolución independiente de servicios.
-
-### Airbnb: Plataforma de Marketplace Escalable
-
-**Contexto:** Marketplace de alojamientos que debe escalar de 0 a millones de búsquedas durante eventos (como Super Bowl).
-
-**Arquitectura:**
-- **Búsqueda:** Elasticsearch en EC2 con auto-scaling
-- **Booking:** Servicios event-driven con SQS y SNS
-- **Pagos:** Aislamiento PCI DSS con microservicios dedicados
-- **ML:** SageMaker para precios dinámicos y recomendaciones
-- **Data:** Airbnb data platform sobre EMR y S3
-
-**Resultados:**
-- Escalado 10x en horas sin intervención manual
-- 99.95% uptime durante eventos de alto tráfico
-- Reducción de 60% en costos con Spot Instances
-
-### Epic Games (Fortnite): Gaming Masivo
-
-**Contexto:** Soportar 125 millones de jugadores concurrentes, con matchmaking en tiempo real y persistencia de estado.
-
-**Arquitectura:**
-- **Game Servers:** GameLift con auto-scaling
-- **Estado:** DynamoDB Global Tables para persistencia multi-región
-- **Caché:** ElastiCache Redis para estado de sesión
-- **Matchmaking:** DynamoDB + Lambda para baja latencia
-- **Social:** RDS para datos relacionales
-
-**Resultados:**
-- Matchmaking en menos de 20ms
-- Eventos de hasta 15 millones de jugadores simultáneos
-- Escalado automático durante eventos especiales
-
-### Lyft: Arquitectura de Rideshare en Tiempo Real
-
-**Contexto:** Coordinar millones de viajes diarios con matching conductor-pasajero en tiempo real.
-
-**Arquitectura:**
-- **Matching:** Sistema de event streaming con Kinesis
-- **Location:** DynamoDB para datos de ubicación en tiempo real
-- **Dispatch:** Lambda + API Gateway para dispatching
-- **Analytics:** Redshift para análisis de rutas y demanda
-- **ML:** SageMaker para estimación de tiempos y precios
-
-**Resultados:**
-- Matching en menos de 1 segundo
-- Procesamiento de 10,000+ eventos/segundo
-- Disponibilidad 99.99%
-
-## Templates de Arquitectura Segura
-
-### Template: Arquitectura Web Multi-Tier Segura (CloudFormation)
+## Escenario: E-commerce "ShopFast" que necesita evolucionar su arquitectura
+
+**Situación actual:** ShopFast es una tienda online con 50,000 usuarios diarios, 2,000 transacciones/hora en horas pico. Su infraestructura monolítica en un único servidor está mostrando:
+- Latencia de 4-8 segundos en checkout
+- 3 outages en el último mes durante campañas
+- Costo fijo de $8,000/mes sin correlación con tráfico real
+- Imposibilidad de escalar componentes individualmente
+
+**Objetivo:** Diseñar arquitecturas modernas que resuelvan estos problemas con patrones probados.
+
+---
+
+## Patrón 1: Arquitectura Web de 3 Niveles (3-Tier)
+
+### Problema Real
+El monolito actual tiene frontend, backend y base de datos en una sola instancia EC2. Cuando hay pico de tráfico en el frontend (usuarios navegando), el backend de pagos se ralentiza afectando a todos.
+
+### Solución Arquitectónica
+Separación física en tres capas independientes:
+- **Nivel Web (Presentación):** Maneja sesiones de usuario, sirve HTML/CSS/JS
+- **Nivel Aplicación (Lógica):** Procesa reglas de negocio, APIs
+- **Nivel Datos:** Persistencia y consultas
+
+Cada nivel escala independientemente según su cuello de botella específico.
+
+### Diagrama de Arquitectura
+
+```mermaid
+graph TB
+    subgraph "Usuarios"
+        U[Usuarios]
+    end
+
+    subgraph "Capa de Presentación"
+        CF[CloudFront CDN]
+        S3[S3 - Assets Estáticos]
+    end
+
+    subgraph "Capa Web"
+        ALB[Application Load Balancer]
+        EC2_1[EC2 Web Tier<br/>t3.medium x2]
+        EC2_2[EC2 Web Tier<br/>t3.medium x2]
+    end
+
+    subgraph "Capa de Aplicación"
+        ALB2[Internal ALB]
+        APP_1[EC2 App Tier<br/>c5.large x3]
+        APP_2[EC2 App Tier<br/>c5.large x3]
+    end
+
+    subgraph "Capa de Datos"
+        RDS[(RDS MySQL<br/>Multi-AZ)]
+        ElastiCache[(ElastiCache<br/>Redis)]
+    end
+
+    U --> CF
+    CF --> S3
+    CF --> ALB
+    ALB --> EC2_1
+    ALB --> EC2_2
+    EC2_1 --> ALB2
+    EC2_2 --> ALB2
+    ALB2 --> APP_1
+    ALB2 --> APP_2
+    APP_1 --> RDS
+    APP_1 --> ElastiCache
+    APP_2 --> RDS
+    APP_2 --> ElastiCache
+```
+
+### Implementación con CloudFormation
 
 ```yaml
+# three-tier-architecture.yaml
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Arquitectura Web de 3 Niveles Alta Disponibilidad y Seguridad'
+Description: 'Arquitectura 3-Tier para ShopFast'
 
 Parameters:
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: CIDR Block para la VPC
+  
   Environment:
     Type: String
-    Default: Production
-    AllowedValues: [Development, Staging, Production]
-  KeyPair:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: Key pair para instancias
-
-Mappings:
-  AWSRegionAMI:
-    us-east-1:
-      AMI: ami-12345678
-    us-west-2:
-      AMI: ami-87654321
+    Default: production
+    AllowedValues: [development, staging, production]
 
 Resources:
-  # VPC Multi-AZ
+  # VPC y Networking
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.0.0.0/16
+      CidrBlock: !Ref VpcCIDR
       EnableDnsHostnames: true
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: !Ref Environment
+          Value: ShopFast-VPC
 
-  # Subnets públicas para ALB
+  # Subnets públicas (Web Tier)
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: !Select [0, !GetAZs '']
-      MapPublicIpOnLaunch: false
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Public-1a
+          Value: Public-1a
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
@@ -955,22 +118,21 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.2.0/24
       AvailabilityZone: !Select [1, !GetAZs '']
-      MapPublicIpOnLaunch: false
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Public-1b
+          Value: Public-1b
 
-  # Subnets privadas para aplicaciones
+  # Subnets privadas (App Tier)
   PrivateAppSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.3.0/24
       AvailabilityZone: !Select [0, !GetAZs '']
-      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Private-App-1a
+          Value: Private-App-1a
 
   PrivateAppSubnet2:
     Type: AWS::EC2::Subnet
@@ -978,22 +140,20 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.4.0/24
       AvailabilityZone: !Select [1, !GetAZs '']
-      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Private-App-1b
+          Value: Private-App-1b
 
-  # Subnets privadas para datos
+  # Subnets privadas (Data Tier)
   PrivateDataSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.5.0/24
       AvailabilityZone: !Select [0, !GetAZs '']
-      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Private-Data-1a
+          Value: Private-Data-1a
 
   PrivateDataSubnet2:
     Type: AWS::EC2::Subnet
@@ -1001,10 +161,9 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.6.0/24
       AvailabilityZone: !Select [1, !GetAZs '']
-      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Private-Data-1b
+          Value: Private-Data-1b
 
   # Internet Gateway
   InternetGateway:
@@ -1012,7 +171,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Ref Environment
+          Value: ShopFast-IGW
 
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -1020,30 +179,21 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
-  # NAT Gateways para outbound de subnets privadas
-  NatGateway1EIP:
+  # NAT Gateway para App Tier
+  NatEIP:
     Type: AWS::EC2::EIP
     DependsOn: AttachGateway
     Properties:
       Domain: vpc
 
-  NatGateway2EIP:
-    Type: AWS::EC2::EIP
-    DependsOn: AttachGateway
-    Properties:
-      Domain: vpc
-
-  NatGateway1:
+  NatGateway:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      AllocationId: !GetAtt NatEIP.AllocationId
       SubnetId: !Ref PublicSubnet1
-
-  NatGateway2:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt NatGateway2EIP.AllocationId
-      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: ShopFast-NAT
 
   # Route Tables
   PublicRouteTable:
@@ -1052,7 +202,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Public-RT
+          Value: Public-RT
 
   PublicRoute:
     Type: AWS::EC2::Route
@@ -1062,92 +212,117 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
-  PrivateRouteTable1:
+  PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${Environment}-Private-RT-1
+          Value: Private-RT
 
-  PrivateRoute1:
+  PrivateRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable1
+      RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway1
+      NatGatewayId: !Ref NatGateway
 
-  # Application Load Balancer
-  ALB:
+  # Security Groups
+  WebTierSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group para Web Tier
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: WebTier-SG
+
+  AppTierSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group para App Tier
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref WebTierSecurityGroup
+      Tags:
+        - Key: Name
+          Value: AppTier-SG
+
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group para Database Tier
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref AppTierSecurityGroup
+      Tags:
+        - Key: Name
+          Value: Database-SG
+
+  # Application Load Balancer (Web Tier)
+  WebALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub ${Environment}-alb
+      Name: ShopFast-Web-ALB
       Scheme: internet-facing
       Type: application
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
       SecurityGroups:
-        - !Ref ALBSecurityGroup
-      IpAddressType: ipv4
-
-  ALBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security Group para ALB
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-
-  ALBListenerHTTPS:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      LoadBalancerArn: !Ref ALB
-      Port: 443
-      Protocol: HTTPS
-      SslPolicy: ELBSecurityPolicy-TLS-1-2-2017-01
-      Certificates:
-        - CertificateArn: !Ref Certificate
-      DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref WebTargetGroup
+        - !Ref WebTierSecurityGroup
+      Tags:
+        - Key: Name
+          Value: ShopFast-Web-ALB
 
   WebTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub ${Environment}-web-tg
+      Name: ShopFast-Web-TG
       Port: 80
       Protocol: HTTP
       VpcId: !Ref VPC
-      TargetType: instance
       HealthCheckPath: /health
       HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
 
-  Certificate:
-    Type: AWS::CertificateManager::Certificate
+  WebALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      DomainName: !Sub '*.${Environment}.example.com'
-      ValidationMethod: DNS
+      LoadBalancerArn: !Ref WebALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WebTargetGroup
 
-  # Auto Scaling Group para tier web
+  # Launch Template para Web Tier
   WebLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: !Sub ${Environment}-web-template
+      LaunchTemplateName: ShopFast-Web-Template
       LaunchTemplateData:
-        ImageId: !FindInMap [AWSRegionAMI, !Ref 'AWS::Region', AMI]
+        ImageId: ami-0c55b159cbfafe1f0  # Amazon Linux 2
         InstanceType: t3.medium
-        KeyName: !Ref KeyPair
         SecurityGroupIds:
-          - !Ref WebSecurityGroup
+          - !Ref WebTierSecurityGroup
         UserData:
           Fn::Base64: |
             #!/bin/bash
@@ -1155,42 +330,49 @@ Resources:
             yum install -y httpd
             systemctl start httpd
             systemctl enable httpd
-            echo "<h1>Hello from $(hostname)</h1>" > /var/www/html/index.html
+            echo "<h1>ShopFast Web Server</h1>" > /var/www/html/index.html
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: ShopFast-Web
+              - Key: Tier
+                Value: Web
 
-  WebSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security Group para instancias web
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          SourceSecurityGroupId: !Ref ALBSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 10.0.0.0/8
-
-  WebAutoScalingGroup:
+  # Auto Scaling Group Web Tier
+  WebASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AutoScalingGroupName: !Sub ${Environment}-web-asg
+      AutoScalingGroupName: ShopFast-Web-ASG
       LaunchTemplate:
         LaunchTemplateId: !Ref WebLaunchTemplate
         Version: !GetAtt WebLaunchTemplate.LatestVersionNumber
       MinSize: 2
-      MaxSize: 10
+      MaxSize: 6
       DesiredCapacity: 2
-      VPCZoneIdentifier:
-        - !Ref PrivateAppSubnet1
-        - !Ref PrivateAppSubnet2
       TargetGroupARNs:
         - !Ref WebTargetGroup
+      VPCZoneIdentifier:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
       HealthCheckType: ELB
       HealthCheckGracePeriod: 300
+      Tags:
+        - Key: Name
+          Value: ShopFast-Web
+          PropagateAtLaunch: true
 
-  # RDS Multi-AZ
+  WebScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref WebASG
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 60.0
+
+  # RDS MySQL Multi-AZ
   DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -1199,61 +381,191 @@ Resources:
         - !Ref PrivateDataSubnet1
         - !Ref PrivateDataSubnet2
 
-  DBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security Group para RDS
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
-          SourceSecurityGroupId: !Ref WebSecurityGroup
-
-  DBInstance:
+  RDSInstance:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBInstanceIdentifier: !Sub ${Environment}-db
-      DBName: webappdb
+      DBInstanceIdentifier: shopfast-database
+      DBInstanceClass: db.t3.medium
       Engine: mysql
       EngineVersion: '8.0'
-      DBInstanceClass: db.t3.medium
-      AllocatedStorage: 20
+      MasterUsername: admin
+      MasterUserPassword: '{{resolve:secretsmanager:shopfast-db-password:SecretString:password}}'
+      AllocatedStorage: 100
+      MaxAllocatedStorage: 500
       StorageType: gp3
       MultiAZ: true
-      MasterUsername: admin
-      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DBSecret}:SecretString:password}}'
-      DBSubnetGroupName: !Ref DBSubnetGroup
       VPCSecurityGroups:
-        - !Ref DBSecurityGroup
+        - !Ref DatabaseSecurityGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
       BackupRetentionPeriod: 7
-      DeletionProtection: true
+      PreferredBackupWindow: 03:00-04:00
+      PreferredMaintenanceWindow: Mon:04:00-Mon:05:00
+      Tags:
+        - Key: Name
+          Value: ShopFast-Database
 
-  DBSecret:
-    Type: AWS::SecretsManager::Secret
+  # ElastiCache Redis
+  ElastiCacheSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
     Properties:
-      Name: !Sub ${Environment}/db/password
-      GenerateSecretString:
-        SecretStringTemplate: '{"username":"admin"}'
-        GenerateStringKey: password
-        PasswordLength: 16
-        ExcludeCharacters: '"@/\'
+      Description: Subnet group para ElastiCache
+      SubnetIds:
+        - !Ref PrivateDataSubnet1
+        - !Ref PrivateDataSubnet2
+
+  ElastiCacheCluster:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      CacheClusterId: shopfast-redis
+      Engine: redis
+      EngineVersion: '7.0'
+      CacheNodeType: cache.t3.micro
+      NumCacheNodes: 1
+      CacheSubnetGroupName: !Ref ElastiCacheSubnetGroup
+      SecurityGroupIds:
+        - !Ref DatabaseSecurityGroup
+      Tags:
+        - Key: Name
+          Value: ShopFast-Redis
 
 Outputs:
-  ALBEndpoint:
-    Description: Endpoint del Application Load Balancer
-    Value: !GetAtt ALB.DNSName
-  VPCId:
-    Description: ID de la VPC
-    Value: !Ref VPC
+  WebALBDNS:
+    Description: DNS del Application Load Balancer
+    Value: !GetAtt WebALB.DNSName
+  
+  RDSEndpoint:
+    Description: Endpoint de la base de datos RDS
+    Value: !GetAtt RDSInstance.Endpoint.Address
+  
+  RedisEndpoint:
+    Description: Endpoint de ElastiCache Redis
+    Value: !GetAtt ElastiCacheCluster.RedisEndpoint
 ```
 
-### Template: Arquitectura Serverless Event-Driven (Terraform)
+### Comandos de Despliegue
+
+```bash
+# 1. Crear secret para la contraseña de la BD
+aws secretsmanager create-secret \
+  --name shopfast-db-password \
+  --secret-string '{"password":"MySecurePassword123!"}' \
+  --region us-east-1
+
+# 2. Validar template
+aws cloudformation validate-template \
+  --template-body file://three-tier-architecture.yaml
+
+# 3. Crear stack
+aws cloudformation create-stack \
+  --stack-name shopfast-three-tier \
+  --template-body file://three-tier-architecture.yaml \
+  --capabilities CAPABILITY_IAM \
+  --region us-east-1
+
+# 4. Monitorear creación
+aws cloudformation describe-stacks \
+  --stack-name shopfast-three-tier \
+  --query 'Stacks[0].StackStatus'
+
+# 5. Obtener outputs
+aws cloudformation describe-stacks \
+  --stack-name shopfast-three-tier \
+  --query 'Stacks[0].Outputs'
+```
+
+### Trade-offs de 3-Tier
+
+| Aspecto | Ventaja | Desventaja | Cuándo usar |
+|---------|---------|------------|-------------|
+| **Escalabilidad** | Cada nivel escala independientemente | Costo de múltiples instancias | Tráfico con picos variables por componente |
+| **Seguridad** | Redes privadas aíslan datos | Complejidad de networking | Datos sensibles, compliance PCI-DSS |
+| **Disponibilidad** | Multi-AZ por diseño | Mayor costo operativo | SLA > 99.9% requerido |
+| **Performance** | Cache en cada nivel | Latencia entre niveles | Aplicaciones con hotspots claros |
+
+---
+
+## Patrón 2: Arquitectura Serverless
+
+### Problema Real
+ShopFast paga $3,000/mes por servidores que están ociosos el 70% del tiempo. Durante la madrugada tienen 100 usuarios, pero pagan el mismo costo que durante horas pico con 10,000 usuarios.
+
+### Solución Arquitectónica
+Eliminar servidores permanentes. Usar:
+- **Lambda** para procesamiento bajo demanda (pago por milisegundo)
+- **API Gateway** como punto de entrada
+- **DynamoDB** como base de datos serverless
+- **S3 + CloudFront** para contenido estático
+- **Cognito** para autenticación
+
+### Diagrama de Arquitectura
+
+```mermaid
+graph TB
+    subgraph "Clientes"
+        U[Usuarios/Web/Mobile]
+    end
+
+    subgraph "Edge"
+        CF[CloudFront CDN]
+        S3[S3 Bucket<br/>Frontend React]
+    end
+
+    subgraph "API Layer"
+        APIG[API Gateway<br/>REST/WebSocket]
+        Cognito[Cognito<br/>User Pools]
+    end
+
+    subgraph "Compute"
+        L1[Lambda: Auth]
+        L2[Lambda: Productos]
+        L3[Lambda: Órdenes]
+        L4[Lambda: Pagos]
+        L5[Lambda: Notificaciones]
+    end
+
+    subgraph "Data"
+        DDB[(DynamoDB<br/>Tablas principales)]
+        DDBStreams[DynamoDB Streams]
+        SQS[SQS<br/>Cola pagos]
+        SNS[SNS<br/>Notificaciones]
+    end
+
+    subgraph "Integrations"
+        S3Data[S3<br/>Data Lake]
+        ES[EventBridge<br/>Scheduled Jobs]
+        CW[CloudWatch<br/>Logs/Metrics]
+    end
+
+    U --> CF
+    CF --> S3
+    U --> APIG
+    APIG --> Cognito
+    APIG --> L1
+    APIG --> L2
+    APIG --> L3
+    APIG --> L4
+    L1 --> DDB
+    L2 --> DDB
+    L3 --> DDB
+    L3 --> SQS
+    L4 --> SQS
+    DDB --> DDBStreams
+    DDBStreams --> L5
+    L5 --> SNS
+    SNS --> U
+    L4 --> S3Data
+    ES --> L4
+    L1 --> CW
+    L2 --> CW
+    L3 --> CW
+```
+
+### Implementación con Terraform
 
 ```hcl
-# main.tf - Arquitectura Serverless Segura
-
+# serverless-shopfast/main.tf
 terraform {
+  required_version = ">= 1.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -1262,57 +574,341 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = var.aws_region
+}
+
 # Variables
+variable "aws_region" {
+  description = "AWS Region"
+  default     = "us-east-1"
+}
+
+variable "project_name" {
+  description = "Nombre del proyecto"
+  default     = "shopfast-serverless"
+}
+
 variable "environment" {
-  description = "Environment name"
-  type        = string
+  description = "Ambiente"
+  default     = "production"
 }
 
-variable "project" {
-  description = "Project name"
-  type        = string
+# S3 Bucket para frontend
+resource "aws_s3_bucket" "frontend" {
+  bucket = "${var.project_name}-frontend-${random_id.bucket_suffix.hex}"
 }
 
-# API Gateway
-resource "aws_api_gateway_rest_api" "api" {
-  name = "${var.project}-${var.environment}-api"
+resource "aws_s3_bucket_website_configuration" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
 
-  endpoint_configuration {
-    types = ["REGIONAL"]
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
   }
 }
 
-# Lambda Function
-resource "aws_lambda_function" "api_handler" {
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  function_name    = "${var.project}-${var.environment}-handler"
-  role            = aws_iam_role.lambda_role.arn
-  handler         = "index.handler"
-  runtime         = "nodejs18.x"
-  timeout         = 30
-  memory_size     = 256
+resource "aws_s3_bucket_public_access_block" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
 
-  environment {
-    variables = {
-      ENVIRONMENT = var.environment
-      TABLE_NAME  = aws_dynamodb_table.data_table.name
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_policy" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "PublicReadGetObject"
+      Effect    = "Allow"
+      Principal = "*"
+      Action    = "s3:GetObject"
+      Resource  = "${aws_s3_bucket.frontend.arn}/*"
+    }]
+  })
+}
+
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}
+
+# CloudFront Distribution
+resource "aws_cloudfront_distribution" "cdn" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+  price_class         = "PriceClass_100"
+
+  origin {
+    domain_name = aws_s3_bucket_website_configuration.frontend.website_endpoint
+    origin_id   = "S3-frontend"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
 
-  vpc_config {
-    subnet_ids         = aws_subnet.private[*].id
-    security_group_ids = [aws_security_group.lambda_sg.id]
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3-frontend"
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+    compress               = true
   }
 
-  tracing_config {
-    mode = "Active"
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
   }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  tags = {
+    Name        = "${var.project_name}-cdn"
+    Environment = var.environment
+  }
+}
+
+# Cognito User Pool
+resource "aws_cognito_user_pool" "main" {
+  name = "${var.project_name}-users"
+
+  auto_verified_attributes = ["email"]
+  
+  password_policy {
+    minimum_length    = 8
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = true
+    require_uppercase = true
+  }
+
+  schema {
+    attribute_data_type = "String"
+    name                = "email"
+    required            = true
+    mutable             = false
+  }
+}
+
+resource "aws_cognito_user_pool_client" "app_client" {
+  name         = "${var.project_name}-app-client"
+  user_pool_id = aws_cognito_user_pool.main.id
+
+  explicit_auth_flows = [
+    "ALLOW_USER_SRP_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH"
+  ]
+
+  generate_secret = false
+}
+
+# DynamoDB Tables
+resource "aws_dynamodb_table" "products" {
+  name         = "${var.project_name}-products"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "productId"
+
+  attribute {
+    name = "productId"
+    type = "S"
+  }
+
+  attribute {
+    name = "category"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "CategoryIndex"
+    hash_key        = "category"
+    projection_type = "ALL"
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  tags = {
+    Name = "${var.project_name}-products"
+  }
+}
+
+resource "aws_dynamodb_table" "orders" {
+  name         = "${var.project_name}-orders"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "orderId"
+  range_key    = "userId"
+
+  attribute {
+    name = "orderId"
+    type = "S"
+  }
+
+  attribute {
+    name = "userId"
+    type = "S"
+  }
+
+  attribute {
+    name = "status"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "StatusIndex"
+    hash_key        = "userId"
+    range_key       = "status"
+    projection_type = "ALL"
+  }
+
+  stream_enabled   = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+
+  tags = {
+    Name = "${var.project_name}-orders"
+  }
+}
+
+# Lambda Function - Products
+resource "aws_lambda_function" "products" {
+  filename         = "lambda-products.zip"
+  function_name    = "${var.project_name}-products"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  timeout          = 10
+  memory_size      = 256
+  source_code_hash = filebase64sha256("lambda-products.zip")
+
+  environment {
+    variables = {
+      PRODUCTS_TABLE = aws_dynamodb_table.products.name
+      REGION         = var.aws_region
+    }
+  }
+}
+
+# Lambda Function - Orders
+resource "aws_lambda_function" "orders" {
+  filename         = "lambda-orders.zip"
+  function_name    = "${var.project_name}-orders"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  timeout          = 30
+  memory_size      = 512
+  source_code_hash = filebase64sha256("lambda-orders.zip")
+
+  environment {
+    variables = {
+      ORDERS_TABLE = aws_dynamodb_table.orders.name
+      SQS_QUEUE_URL = aws_sqs_queue.payments.id
+      REGION       = var.aws_region
+    }
+  }
+}
+
+# Lambda Code (Products) - Inline para ejemplo
+resource "local_file" "lambda_products_code" {
+  filename = "lambda-products.js"
+  content  = <<EOF
+const AWS = require('aws-sdk');
+const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+exports.handler = async (event) => {
+    const tableName = process.env.PRODUCTS_TABLE;
+    
+    try {
+        switch (event.httpMethod) {
+            case 'GET':
+                if (event.pathParameters && event.pathParameters.id) {
+                    // Get single product
+                    const result = await dynamodb.get({
+                        TableName: tableName,
+                        Key: { productId: event.pathParameters.id }
+                    }).promise();
+                    
+                    return {
+                        statusCode: 200,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(result.Item)
+                    };
+                } else {
+                    // List products
+                    const result = await dynamodb.scan({
+                        TableName: tableName,
+                        Limit: 50
+                    }).promise();
+                    
+                    return {
+                        statusCode: 200,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(result.Items)
+                    };
+                }
+                
+            case 'POST':
+                const product = JSON.parse(event.body);
+                product.productId = Date.now().toString();
+                product.createdAt = new Date().toISOString();
+                
+                await dynamodb.put({
+                    TableName: tableName,
+                    Item: product
+                }).promise();
+                
+                return {
+                    statusCode: 201,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(product)
+                };
+                
+            default:
+                return {
+                    statusCode: 405,
+                    body: JSON.stringify({ error: 'Method not allowed' })
+                };
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        return {
+            statusCode: 500,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+};
+EOF
 }
 
 # IAM Role para Lambda
 resource "aws_iam_role" "lambda_role" {
-  name = "${var.project}-${var.environment}-lambda-role"
+  name = "${var.project_name}-lambda-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -1327,7 +923,7 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "${var.project}-${var.environment}-lambda-policy"
+  name = "${var.project_name}-lambda-policy"
   role = aws_iam_role.lambda_role.id
 
   policy = jsonencode({
@@ -1349,341 +945,2224 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "dynamodb:PutItem",
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem",
-          "dynamodb:Query",
-          "dynamodb:Scan"
+          "dynamodb:Scan",
+          "dynamodb:Query"
         ]
-        Resource = aws_dynamodb_table.data_table.arn
+        Resource = [
+          aws_dynamodb_table.products.arn,
+          aws_dynamodb_table.orders.arn,
+          "${aws_dynamodb_table.products.arn}/index/*",
+          "${aws_dynamodb_table.orders.arn}/index/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = aws_sqs_queue.payments.arn
       }
     ]
   })
 }
 
-# DynamoDB Table
-resource "aws_dynamodb_table" "data_table" {
-  name         = "${var.project}-${var.environment}-data"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
+# API Gateway
+resource "aws_api_gateway_rest_api" "main" {
+  name        = "${var.project_name}-api"
+  description = "ShopFast API"
 
-  attribute {
-    name = "id"
-    type = "S"
-  }
-
-  point_in_time_recovery {
-    enabled = true
-  }
-
-  server_side_encryption {
-    enabled = true
-  }
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project
+  endpoint_configuration {
+    types = ["REGIONAL"]
   }
 }
 
-# SQS Queue para procesamiento asíncrono
-resource "aws_sqs_queue" "processing_queue" {
-  name                      = "${var.project}-${var.environment}-queue"
+# API Gateway Resources
+resource "aws_api_gateway_resource" "products" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
+  path_part   = "products"
+}
+
+resource "aws_api_gateway_resource" "product" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.products.id
+  path_part   = "{id}"
+}
+
+# API Gateway Methods
+resource "aws_api_gateway_method" "products_get" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.products.id
+  http_method   = "GET"
+  authorization_type = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+}
+
+resource "aws_api_gateway_method" "products_post" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.products.id
+  http_method   = "POST"
+  authorization_type = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+}
+
+resource "aws_api_gateway_authorizer" "cognito" {
+  name          = "${var.project_name}-cognito"
+  type          = "COGNITO_USER_POOLS"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  provider_arns = [aws_cognito_user_pool.main.arn]
+}
+
+# Lambda Integrations
+resource "aws_api_gateway_integration" "products_get" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.products.id
+  http_method = aws_api_gateway_method.products_get.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.products.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "products_post" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.products.id
+  http_method = aws_api_gateway_method.products_post.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.products.invoke_arn
+}
+
+# Lambda Permissions
+resource "aws_lambda_permission" "api_gateway_products" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.products.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+# API Gateway Deployment
+resource "aws_api_gateway_deployment" "prod" {
+  depends_on = [
+    aws_api_gateway_integration.products_get,
+    aws_api_gateway_integration.products_post
+  ]
+
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  stage_name  = "prod"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# SQS Queue para pagos
+resource "aws_sqs_queue" "payments" {
+  name                      = "${var.project_name}-payments-queue"
   delay_seconds             = 0
   max_message_size          = 262144
   message_retention_seconds = 345600
-  receive_wait_time_seconds = 10
+  receive_wait_time_seconds = 20
+  visibility_timeout_seconds = 300
 
-  kms_master_key_id = "alias/aws/sqs"
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project
-  }
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.payments_dlq.arn
+    maxReceiveCount     = 3
+  })
 }
 
-# EventBridge Rule
-resource "aws_cloudwatch_event_rule" "scheduled_rule" {
-  name                = "${var.project}-${var.environment}-schedule"
-  description         = "Trigger Lambda on schedule"
-  schedule_expression = "rate(5 minutes)"
-}
-
-resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule      = aws_cloudwatch_event_rule.scheduled_rule.name
-  target_id = "LambdaFunction"
-  arn       = aws_lambda_function.api_handler.arn
+resource "aws_sqs_queue" "payments_dlq" {
+  name = "${var.project_name}-payments-dlq"
 }
 
 # Outputs
+output "cloudfront_domain" {
+  value = aws_cloudfront_distribution.cdn.domain_name
+}
+
 output "api_endpoint" {
-  description = "API Gateway endpoint"
-  value       = aws_api_gateway_deployment.api.invoke_url
+  value = aws_api_gateway_deployment.prod.invoke_url
 }
 
-output "lambda_function_name" {
-  description = "Lambda function name"
-  value       = aws_lambda_function.api_handler.function_name
+output "cognito_user_pool_id" {
+  value = aws_cognito_user_pool.main.id
+}
+
+output "cognito_app_client_id" {
+  value = aws_cognito_user_pool_client.app_client.id
 }
 ```
 
-## Árbol de Decisiones: Selección de Arquitectura
+### Comandos de Despliegue
 
-```
-¿Cuál es el patrón de carga de trabajo principal?
-│
-├─ Tráfico web/aplicación con usuarios concurrentes
-│   │
-│   ├─ ¿Necesita escalado automático?
-│   │   ├─ SÍ → Arquitectura de 3 niveles con Auto Scaling
-│   │   │   │
-│   │   │   ├─ ¿Tiene componentes stateful?
-│   │   │   │   ├─ SÍ → Session affinity + ElastiCache
-│   │   │   │   └─ NO → Stateless ideal, ELB round-robin
-│   │   │   │
-│   │   │   └─ ¿Requiere alta disponibilidad (99.99%+)?
-│   │   │       ├─ SÍ → Multi-AZ + Multi-Region failover
-│   │   │       └─ NO → Multi-AZ suficiente
-│   │   │
-│   │   └─ NO → Arquitectura de 2 niveles (desarrollo/piloto)
-│   │
-│   ├─ ¿Es carga de trabajo variable/impredecible?
-│   │   ├─ SÍ → Arquitectura Serverless (Lambda + API Gateway)
-│   │   │   │
-│   │   │   ├─ ¿Tiene requisitos de latencia muy baja (<10ms)?
-│   │   │   │   ├─ SÍ → Considerar EC2 con provisioned capacity
-│   │   │   │   └─ NO → Lambda es adecuado
-│   │   │   │
-│   │   │   └─ ¿Requiere ejecución > 15 min?
-│   │   │       ├─ SÍ → Fargate o EC2
-│   │   │       └─ NO → Lambda + Step Functions para orquestación
-│   │   │
-│   │   └─ NO → Contenedores con ECS/EKS para consistencia
-│   │
-│   └─ ¿Es aplicación legacy monolítica?
-│       ├─ SÍ → Rehost en EC2 → gradualmente microservicios
-│       └─ NO → Cloud-native desde el inicio
-│
-├─ Procesamiento de datos/análisis
-│   │
-│   ├─ ¿Es análisis en tiempo real?
-│   │   ├─ SÍ → Kinesis + Lambda/Flink + ElastiCache/DynamoDB
-│   │   │   │
-│   │   │   ├─ ¿Volumen > 1TB/día?
-│   │   │   │   ├─ SÍ → Kinesis Data Streams + EMR/Spark
-│   │   │   │   └─ NO → Kinesis Data Analytics
-│   │   │   │
-│   │   │   └─ ¿Latencia crítica (<100ms)?
-│   │   │       ├─ SÍ → Kinesis + ElastiCache
-│   │   │       └─ NO → Kinesis + Lambda suficiente
-│   │   │
-│   │   └─ NO → Batch processing con Step Functions + EMR/Glue
-│   │
-│   ├─ ¿Necesita data warehouse?
-│   │   ├─ SÍ → Redshift para análisis estructurado
-│   │   │   │
-│   │   │   ├─ ¿Datos > 100TB?
-│   │   │   │   ├─ SÍ → RA3 nodes con managed storage
-│   │   │   │   └─ NO → DC2 o DS2 nodes
-│   │   │   │
-│   │   │   └─ ¿Consultas frecuentes sobre datos en S3?
-│   │   │       ├─ SÍ → Redshift Spectrum
-│   │   │       └─ NO → Redshift nativo
-│   │   │
-│   │   └─ NO → Data Lake con S3 + Athena
-│   │
-│   └─ ¿Necesita ML/IA?
-│       ├─ SÍ → SageMaker para entrenamiento e inferencia
-│       │   │
-│       │   ├─ ¿Modelos pre-entrenados suficientes?
-│       │   │   ├─ SÍ → Amazon Bedrock
-│       │   │   └─ NO → SageMaker custom training
-│       │   │
-│       │   └─ ¿Inferencia en tiempo real con alta demanda?
-│       │       ├─ SÍ → SageMaker Endpoints con Auto Scaling
-│       │       └─ NO → SageMaker Serverless Inference
-│       │
-│       └─ NO → Glue + Athena para análisis tradicional
-│
-└─ Comunicación/Integración entre sistemas
-    │
-    ├─ ¿Es comunicación asíncrona?
-    │   ├─ SÍ → SQS para colas o SNS para pub/sub
-    │   │   │
-    │   │   ├─ ¿Necesita garantía de entrega exactamente-una-vez?
-    │   │   │   ├─ SÍ → SQS FIFO
-    │   │   │   └─ NO → SQS Standard
-    │   │   │
-    │   │   └─ ¿Múltiples consumidores?
-    │   │       ├─ SÍ → SNS + SQS fan-out
-    │   │       └─ NO → SQS directo
-    │   │
-    │   └─ NO → EventBridge para event-driven
-    │
-    ├─ ¿Es orquestación de procesos?
-    │   ├─ SÍ → Step Functions para workflows
-    │   │   │
-    │   │   ├─ ¿Workflow largo (> 1 año)?
-    │   │   │   ├─ SÍ → Step Functions Standard
-    │   │   │   └─ NO → Step Functions Express
-    │   │   │
-    │   │   └─ ¿Necesita integración con servicios externos?
-    │   │       ├─ SÍ → Callback patterns
-    │   │       └─ NO → Native service integration
-    │   │
-    │   └─ NO → Lambda direct invocation
-    │
-    └─ ¿Es API para consumo externo?
-        ├─ SÍ → API Gateway
-        │   │
-        │   ├─ ¿Necesita WebSocket?
-        │   │   ├─ SÍ → API Gateway WebSocket API
-        │   │   └─ NO → REST API o HTTP API
-        │   │
-        │   └─ ¿Requiere throttling avanzado?
-        │       ├─ SÍ → API Gateway REST con usage plans
-        │       └─ NO → HTTP API (más económico)
-        │
-        └─ NO → ALB/NLB para internal APIs
+```bash
+# 1. Inicializar Terraform
+cd serverless-shopfast
+terraform init
+
+# 2. Crear archivo de variables (opcional)
+cat > terraform.tfvars <<EOF
+aws_region   = "us-east-1"
+project_name = "shopfast-serverless"
+environment  = "production"
+EOF
+
+# 3. Validar configuración
+terraform validate
+
+# 4. Ver cambios planificados
+terraform plan
+
+# 5. Aplicar infraestructura
+terraform apply
+
+# 6. Ver outputs	erraform output
+
+# 7. Subir frontend a S3 (ejemplo con React build)
+aws s3 sync ./build s3://$(terraform output -raw bucket_name) --delete
+
+# 8. Invalidar cache de CloudFront
+aws cloudfront create-invalidation \
+  --distribution-id $(terraform output -raw cloudfront_distribution_id) \
+  --paths "/*"
 ```
 
-### Matriz Comparativa de Arquitecturas
+### Trade-offs Serverless
 
-| Criterio | 3-Tier EC2 | Serverless | Containerizada | Data Lake |
-|----------|------------|------------|----------------|-----------|
-| **Costo (baja carga)** | Alto | Bajo | Medio | Medio |
-| **Costo (alta carga)** | Medio | Alto | Bajo | Bajo |
-| **Escalado** | Manual/Auto | Automático | Automático | Automático |
-| **Time to Market** | Medio | Rápido | Medio | Medio |
-| **Control** | Alto | Bajo | Alto | Medio |
-| **Vendor Lock-in** | Bajo | Alto | Medio | Alto |
-| **Complejidad Ops** | Alta | Baja | Media | Media |
+| Aspecto | Ventaja | Desventaja | Cuándo usar |
+|---------|---------|------------|-------------|
+| **Costo** | Pago por uso real | Latencia de cold start | Tráfico muy variable, startups |
+| **Escalabilidad** | Automática infinita | Límites de concurrencia | Picos impredecibles, eventos |
+| **Operación** | Sin gestión de servidores | Menor control del entorno | Equipos pequeños, MVP |
+| **Tiempo** | Despliegue en segundos | Timeout 15 min (Lambda) | Microservicios, APIs rápidas |
 
-## Calculadora Comparativa de Costos por Arquitectura
+---
 
-### Escenario: Aplicación Web con 1,000 usuarios concurrentes
+## Patrón 3: Arquitectura de Microservicios
 
-**Arquitectura 3-Tier (EC2):**
+### Problema Real
+El monolito de ShopFast tiene un módulo de "recomendaciones" que consume 80% de CPU. Cuando se actualiza el módulo de "inventario", todo el sistema se reinicia. Los equipos se bloquean esperando releases coordinadas.
+
+### Solución Arquitectónica
+Separar por dominios de negocio:
+- **Servicio de Catálogo:** Productos, búsqueda, filtros
+- **Servicio de Carrito:** Items, cantidades, cálculos
+- **Servicio de Pagos:** Procesamiento, fraud detection
+- **Servicio de Recomendaciones:** ML, personalización
+- **Servicio de Notificaciones:** Email, SMS, push
+
+Cada servicio tiene su propio equipo, tecnología, base de datos y ciclo de vida.
+
+### Diagrama de Arquitectura
+
+```mermaid
+graph TB
+    subgraph "Cliente"
+        Web[Web App]
+        Mobile[Mobile App]
+    end
+
+    subgraph "Ingress"
+        ALB[Application Load Balancer]
+    end
+
+    subgraph "Service Mesh / API Gateway"
+        APIG[AWS App Mesh<br/>Envoy Proxy]
+    end
+
+    subgraph "Microservicios"
+        subgraph "Catalog Service"
+            CS[ECS Fargate<br/>Node.js]
+            CSDB[(RDS<br/>PostgreSQL)]
+        end
+
+        subgraph "Cart Service"
+            CartS[ECS Fargate<br/>Go]
+            CartDB[(DynamoDB)]
+        end
+
+        subgraph "Payment Service"
+            PS[ECS Fargate<br/>Java Spring]
+            PSDB[(Aurora)]
+            SQS_P[SQS<br/>Async processing]
+        end
+
+        subgraph "Recommendation Service"
+            RS[SageMaker<br/>Endpoint]
+            RSCache[(ElastiCache)]
+        end
+
+        subgraph "Notification Service"
+            NS[Lambda<br/>Python]
+            SNS_N[SNS Topics]
+        end
+    end
+
+    subgraph "Infraestructura Compartida"
+        XRay[AWS X-Ray]
+        CWLogs[CloudWatch Logs]
+        Secrets[Secrets Manager]
+    end
+
+    Web --> ALB
+    Mobile --> ALB
+    ALB --> APIG
+    APIG --> CS
+    APIG --> CartS
+    APIG --> PS
+    APIG --> RS
+    
+    CS --> CSDB
+    CartS --> CartDB
+    PS --> PSDB
+    PS --> SQS_P
+    RS --> RSCache
+    NS --> SNS_N
+    
+    CS -.-> XRay
+    CartS -.-> XRay
+    PS -.-> XRay
+    RS -.-> XRay
+    NS -.-> XRay
 ```
-2 ALB: $32.40/mes
-4 EC2 t3.medium (web): $161.28/mes
-2 EC2 t3.large (app): $161.28/mes
-1 RDS db.t3.medium Multi-AZ: $122.64/mes
-100GB EBS: $10.00/mes
-Data Transfer: $45.00/mes
-TOTAL: $532.60/mes
+
+### Implementación con ECS Fargate
+
+```yaml
+# microservices-shopfast.yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Microservicios ShopFast con ECS Fargate'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+  
+  ImageCatalog:
+    Type: String
+    Default: 'your-account.dkr.ecr.us-east-1.amazonaws.com/catalog-service:latest'
+  
+  ImageCart:
+    Type: String
+    Default: 'your-account.dkr.ecr.us-east-1.amazonaws.com/cart-service:latest'
+
+Resources:
+  # VPC y Networking (igual que 3-tier)
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+
+  # ECS Cluster
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: shopfast-microservices
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - Base: 2
+          Weight: 1
+          CapacityProvider: FARGATE
+        - Weight: 3
+          CapacityProvider: FARGATE_SPOT
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  # CloudWatch Log Groups
+  CatalogLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/catalog-service
+      RetentionInDays: 7
+
+  CartLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/cart-service
+      RetentionInDays: 7
+
+  # IAM Roles para ECS
+  ECSExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: XRayAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: '*'
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                Resource: !GetAtt CartTable.Arn
+
+  # Security Groups
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  ServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group para servicios ECS
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  # Application Load Balancer
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: shopfast-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+
+  # Target Groups para cada servicio
+  CatalogTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: catalog-tg
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+
+  CartTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: cart-tg
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /health
+
+  # Listener y Routing Rules
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 404
+            ContentType: text/plain
+            MessageBody: 'Not Found'
+
+  CatalogListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values: ['/catalog/*', '/products/*']
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref CatalogTargetGroup
+
+  CartListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 2
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values: ['/cart/*', '/items/*']
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref CartTargetGroup
+
+  # Task Definitions
+  CatalogTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: catalog-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: catalog-service
+          Image: !Ref ImageCatalog
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          Environment:
+            - Name: SERVICE_NAME
+              Value: catalog-service
+            - Name: DATABASE_URL
+              Value: !Sub 'postgresql://user:pass@${CatalogDB.Endpoint.Address}:5432/catalog'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CatalogLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  CartTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: cart-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: cart-service
+          Image: !Ref ImageCart
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: SERVICE_NAME
+              Value: cart-service
+            - Name: DYNAMODB_TABLE
+              Value: !Ref CartTable
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CartLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  # ECS Services
+  CatalogService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: catalog-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref CatalogTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref ServiceSecurityGroup
+          Subnets:
+            - !Ref PrivateSubnet1
+            - !Ref PrivateSubnet2
+      LoadBalancers:
+        - ContainerName: catalog-service
+          ContainerPort: 8080
+          TargetGroupArn: !Ref CatalogTargetGroup
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+
+  CartService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: cart-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref CartTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref ServiceSecurityGroup
+          Subnets:
+            - !Ref PrivateSubnet1
+            - !Ref PrivateSubnet2
+      LoadBalancers:
+        - ContainerName: cart-service
+          ContainerPort: 8080
+          TargetGroupArn: !Ref CartTargetGroup
+
+  # Auto Scaling
+  CatalogScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 2
+      ResourceId: !Sub 'service/${ECSCluster}/${CatalogService}'
+      RoleARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService'
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  CatalogScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: catalog-cpu-scaling
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CatalogScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 70.0
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+
+  # Base de datos para Catalog Service
+  CatalogDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: catalog-db
+      DBInstanceClass: db.t3.micro
+      Engine: postgres
+      EngineVersion: '14.9'
+      MasterUsername: catalogadmin
+      MasterUserPassword: 'CatalogDB123!'
+      AllocatedStorage: 20
+      StorageType: gp2
+      VPCSecurityGroups:
+        - !Ref DBSecurityGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group para microservicios
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group para RDS
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ServiceSecurityGroup
+
+  # DynamoDB para Cart Service
+  CartTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cart-items
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: itemId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: itemId
+          KeyType: RANGE
+
+  # Service Discovery (Cloud Map)
+  Namespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: shopfast.local
+      Vpc: !Ref VPC
+
+Outputs:
+  ALBURL:
+    Description: URL del Application Load Balancer
+    Value: !Sub 'http://${ALB.DNSName}'
+  
+  CatalogEndpoint:
+    Description: Endpoint del servicio de catálogo
+    Value: !Sub 'http://${ALB.DNSName}/catalog'
+  
+  CartEndpoint:
+    Description: Endpoint del servicio de carrito
+    Value: !Sub 'http://${ALB.DNSName}/cart'
+  
+  ECSClusterName:
+    Description: Nombre del cluster ECS
+    Value: !Ref ECSCluster
 ```
 
-**Arquitectura Serverless:**
+### Dockerfile de Ejemplo (Catalog Service)
+
+```dockerfile
+# catalog-service/Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copiar código
+COPY . .
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+EXPOSE 8080
+
+USER node
+
+CMD ["node", "server.js"]
 ```
-API Gateway: 100M requests: $350.00/mes
-Lambda: 10M invocaciones, 512MB, 200ms avg: $104.17/mes
-DynamoDB on-demand: 10M reads, 5M writes: $75.00/mes
-CloudFront: 100GB: $8.50/mes
-S3: 500GB: $11.50/mes
-TOTAL: $549.17/mes
+
+### Código del Servicio (Node.js + Express)
+
+```javascript
+// catalog-service/server.js
+const express = require('express');
+const { Pool } = require('pg');
+const AWSXRay = require('aws-xray-sdk-core');
+const AWS = AWSXRay.captureAWS(require('aws-sdk'));
+
+const app = express();
+app.use(express.json());
+
+// X-Ray tracing
+app.use(AWSXRay.express.openSegment('catalog-service'));
+
+// Database connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', service: 'catalog' });
+});
+
+// List products with pagination
+app.get('/catalog/products', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = (page - 1) * limit;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM products ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+
+    res.json({
+      products: result.rows,
+      pagination: { page, limit, total: result.rowCount }
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+// Get single product
+app.get('/catalog/products/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM products WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
+// Search products
+app.get('/catalog/search', async (req, res) => {
+  const { q, category } = req.query;
+
+  try {
+    let query = 'SELECT * FROM products WHERE 1=1';
+    const params = [];
+
+    if (q) {
+      params.push(`%${q}%`);
+      query += ` AND (name ILIKE $${params.length} OR description ILIKE $${params.length})`;
+    }
+
+    if (category) {
+      params.push(category);
+      query += ` AND category = $${params.length}`;
+    }
+
+    query += ' ORDER BY name';
+
+    const result = await pool.query(query, params);
+    res.json({ products: result.rows, count: result.rowCount });
+  } catch (error) {
+    console.error('Error searching products:', error);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+app.use(AWSXRay.express.closeSegment());
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Catalog service running on port ${PORT}`);
+});
 ```
 
-**Arquitectura Containerizada (ECS Fargate):**
+### Trade-offs Microservicios
+
+| Aspecto | Ventaja | Desventaja | Cuándo usar |
+|---------|---------|------------|-------------|
+| **Escalabilidad organizacional** | Equipos autónomos | Complejidad de coordinación | >5 desarrolladores, múltiples equipos |
+| **Tecnología** | Cada servicio usa lo mejor | Fragmentación de stack | Requisitos variados por dominio |
+| **Despliegue** | Cambios independientes | Orquestación compleja | Release frecuentes (>1/día) |
+| **Resiliencia** | Aislamiento de fallos | Distribución de fallos | SLA crítico, zero-downtime |
+
+---
+
+## Patrón 4: Arquitectura Event-Driven
+
+### Problema Real
+En ShopFast, cuando un usuario completa una compra, el sistema debe: actualizar inventario, enviar email, actualizar métricas, notificar al servicio de envíos, y actualizar el modelo de recomendaciones. Actualmente hace 5 llamadas síncronas bloqueantes. Si el servicio de email falla, toda la orden falla.
+
+### Solución Arquitectónica
+Comunicación asíncrona mediante eventos:
+- **EventBridge:** Bus de eventos central
+- **SNS:** Notificaciones pub/sub
+- **SQS:** Colas para procesamiento
+- **Lambda:** Procesadores de eventos
+
+El flujo: OrderCompleted → EventBridge → Múltiples suscriptores procesan en paralelo.
+
+### Diagrama de Arquitectura
+
+```mermaid
+graph TB
+    subgraph "Event Sources"
+        API[API Gateway<br/>Ordenes]
+        IoT[IoT Core<br/>Sensores]
+        S3Events[S3<br/>Nuevos archivos]
+    end
+
+    subgraph "Event Bus"
+        EB[EventBridge<br/>Event Bus]
+    end
+
+    subgraph "Event Rules"
+        R1[Rule: order-completed]
+        R2[Rule: inventory-low]
+        R3[Rule: payment-received]
+        R4[Rule: user-registered]
+    end
+
+    subgraph "Targets"
+        subgraph "SQS Queues"
+            Q1[SQS<br/>Payment Queue]
+            Q2[SQS<br/>Inventory Queue]
+            Q3[SQS<br/>Notification Queue]
+        end
+
+        subgraph "Lambda Processors"
+            L1[Lambda<br/>Process Payment]
+            L2[Lambda<br/>Update Inventory]
+            L3[Lambda<br/>Send Email]
+            L4[Lambda<br/>Update Analytics]
+            L5[Lambda<br/>Trigger ML]
+        end
+
+        subgraph "External"
+            SFN[Step Functions<br/>Workflows complejos]
+            SNS2[SNS<br/>SMS Push]
+        end
+    end
+
+    subgraph "Data Stores"
+        DDB[(DynamoDB<br/>Event Store)]
+        S3DLQ[S3<br/>DLQ Events]
+    end
+
+    API -->|OrderCompleted| EB
+    IoT -->|SensorData| EB
+    S3Events -->|ObjectCreated| EB
+
+    EB --> R1
+    EB --> R2
+    EB --> R3
+    EB --> R4
+
+    R1 --> Q1
+    R1 --> Q2
+    R1 --> Q3
+
+    Q1 --> L1
+    Q2 --> L2
+    Q3 --> L3
+
+    R1 --> L4
+    R2 --> L5
+    R3 --> SFN
+    R4 --> SNS2
+
+    L1 -.->|Failed events| S3DLQ
+    L2 -.->|Failed events| S3DLQ
+
+    EB -.->|Archive| DDB
 ```
-ECS Fargate: 4 tasks x 0.5 vCPU, 1GB RAM: $115.20/mes
-ALB: $16.20/mes
-Aurora Serverless: 2 ACU avg: $350.00/mes
-CloudFront: $8.50/mes
-ElastiCache: cache.t3.micro: $12.41/mes
-TOTAL: $502.31/mes
+
+### Implementación con EventBridge
+
+```yaml
+# event-driven-shopfast.yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Arquitectura Event-Driven para ShopFast'
+
+Resources:
+  # Event Bus Personalizado
+  ShopFastEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: shopfast-events
+
+  # SQS Queues con DLQ
+  PaymentDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: payment-dlq
+      MessageRetentionPeriod: 1209600  # 14 días
+
+  PaymentQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: payment-queue
+      VisibilityTimeout: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt PaymentDLQ.Arn
+        maxReceiveCount: 3
+
+  InventoryDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: inventory-dlq
+
+  InventoryQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: inventory-queue
+      VisibilityTimeout: 180
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt InventoryDLQ.Arn
+        maxReceiveCount: 3
+
+  NotificationDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: notification-dlq
+
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: notification-queue
+      VisibilityTimeout: 120
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt NotificationDLQ.Arn
+        maxReceiveCount: 3
+
+  # SNS Topics
+  OrderEventsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: order-events
+      DisplayName: ShopFast Order Events
+
+  # EventBridge Rules
+  OrderCompletedRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: order-completed-rule
+      Description: 'Procesar eventos de orden completada'
+      EventBusName: !Ref ShopFastEventBus
+      EventPattern:
+        source:
+          - shopfast.orders
+        detail-type:
+          - Order Completed
+        detail:
+          status:
+            - confirmed
+      Targets:
+        - Id: PaymentQueue
+          Arn: !GetAtt PaymentQueue.Arn
+          SqsParameters:
+            MessageGroupId: payment-group
+        - Id: InventoryQueue
+          Arn: !GetAtt InventoryQueue.Arn
+          SqsParameters:
+            MessageGroupId: inventory-group
+        - Id: NotificationQueue
+          Arn: !GetAtt NotificationQueue.Arn
+
+  InventoryLowRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: inventory-low-rule
+      Description: 'Alertar cuando el inventario es bajo'
+      EventBusName: !Ref ShopFastEventBus
+      EventPattern:
+        source:
+          - shopfast.inventory
+        detail-type:
+          - Inventory Low
+      Targets:
+        - Id: SNSNotification
+          Arn: !Ref OrderEventsTopic
+
+  PaymentReceivedRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: payment-received-rule
+      Description: 'Procesar pagos recibidos'
+      EventBusName: !Ref ShopFastEventBus
+      EventPattern:
+        source:
+          - shopfast.payments
+        detail-type:
+          - Payment Received
+      Targets:
+        - Id: StepFunction
+          Arn: !Ref OrderProcessingWorkflow
+          RoleArn: !GetAtt EventBridgeRole.Arn
+
+  # Step Function para workflow complejo
+  OrderProcessingWorkflow:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: order-processing-workflow
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      Definition:
+        Comment: 'Procesamiento completo de orden'
+        StartAt: ValidateOrder
+        States:
+          ValidateOrder:
+            Type: Task
+            Resource: !GetAtt ValidateOrderFunction.Arn
+            Next: CheckInventory
+            Catch:
+              - ErrorEquals: ['ValidationError']
+                ResultPath: '$.error'
+                Next: OrderFailed
+          
+          CheckInventory:
+            Type: Task
+            Resource: !GetAtt CheckInventoryFunction.Arn
+            Next: ProcessPayment
+            Catch:
+              - ErrorEquals: ['InventoryError']
+                ResultPath: '$.error'
+                Next: OrderFailed
+          
+          ProcessPayment:
+            Type: Task
+            Resource: !GetAtt ProcessPaymentFunction.Arn
+            Next: SendConfirmation
+            Catch:
+              - ErrorEquals: ['PaymentError']
+                ResultPath: '$.error'
+                Next: OrderFailed
+          
+          SendConfirmation:
+            Type: Task
+            Resource: !GetAtt SendEmailFunction.Arn
+            Next: OrderCompleted
+          
+          OrderCompleted:
+            Type: Task
+            Resource: !GetAtt UpdateAnalyticsFunction.Arn
+            End: true
+          
+          OrderFailed:
+            Type: Task
+            Resource: !GetAtt CompensateOrderFunction.Arn
+            End: true
+
+  # Lambda Functions
+  ValidateOrderFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: shopfast-validate-order
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            console.log('Validating order:', JSON.stringify(event));
+            
+            if (!event.orderId || !event.userId || !event.items) {
+              throw new Error('ValidationError');
+            }
+            
+            return { valid: true, orderId: event.orderId };
+          };
+
+  ProcessPaymentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: shopfast-process-payment
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            console.log('Processing payment:', event.orderId);
+            
+            // Simular procesamiento de pago
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            return {
+              paymentId: `pay_${Date.now()}`,
+              status: 'completed',
+              orderId: event.orderId,
+              amount: event.amount
+            };
+          };
+
+  CheckInventoryFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: shopfast-check-inventory
+      Runtime: python3.11
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          
+          dynamodb = boto3.resource('dynamodb')
+          
+          def handler(event, context):
+              print(f"Checking inventory for order: {event}")
+              
+              table = dynamodb.Table('inventory')
+              items = event.get('items', [])
+              
+              for item in items:
+                  response = table.get_item(Key={'productId': item['id']})
+                  stock = response.get('Item', {}).get('quantity', 0)
+                  
+                  if stock < item['quantity']:
+                      raise Exception('InventoryError')
+              
+              return {'available': True, 'orderId': event['orderId']}
+
+  SendEmailFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: shopfast-send-email
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          FROM_EMAIL: orders@shopfast.com
+      Timeout: 30
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const ses = new AWS.SES({ region: 'us-east-1' });
+          
+          exports.handler = async (event) => {
+            const params = {
+              Destination: {
+                ToAddresses: [event.userEmail]
+              },
+              Message: {
+                Body: {
+                  Html: {
+                    Data: `<h1>Orden Confirmada #${event.orderId}</h1><p>Gracias por tu compra!</p>`
+                  }
+                },
+                Subject: {
+                  Data: 'ShopFast - Confirmación de Orden'
+                }
+              },
+              Source: process.env.FROM_EMAIL
+            };
+            
+            try {
+              await ses.sendEmail(params).promise();
+              return { sent: true, orderId: event.orderId };
+            } catch (error) {
+              console.error('Error sending email:', error);
+              // No fallamos el workflow si el email falla
+              return { sent: false, orderId: event.orderId, error: error.message };
+            }
+          };
+
+  UpdateAnalyticsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: shopfast-update-analytics
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const firehose = new AWS.Firehose();
+          
+          exports.handler = async (event) => {
+            const record = {
+              Data: JSON.stringify({
+                eventType: 'order_completed',
+                orderId: event.orderId,
+                timestamp: new Date().toISOString(),
+                amount: event.amount,
+                userId: event.userId
+              }) + '\n'
+            };
+            
+            await firehose.putRecord({
+              DeliveryStreamName: process.env.FIREHOSE_STREAM,
+              Record: record
+            }).promise();
+            
+            return { recorded: true };
+          };
+
+  CompensateOrderFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: shopfast-compensate-order
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            console.log('Compensating failed order:', event);
+            
+            // Liberar inventario reservado
+            // Cancelar pago si se procesó
+            // Enviar email de cancelación
+            
+            return { compensated: true, orderId: event.orderId };
+          };
+
+  # IAM Roles
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: EventDrivenAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:PutItem
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - events:PutEvents
+                Resource: !GetAtt ShopFastEventBus.Arn
+
+  EventBridgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: EventBridgeInvokeStepFunction
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource: !Ref OrderProcessingWorkflow
+
+  StepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StepFunctionsInvokeLambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: '*'
+
+  # Event Archive
+  EventArchive:
+    Type: AWS::Events::Archive
+    Properties:
+      ArchiveName: shopfast-event-archive
+      EventBusName: !Ref ShopFastEventBus
+      RetentionDays: 30
+      EventPattern:
+        source:
+          - shopfast.orders
+          - shopfast.payments
+          - shopfast.inventory
+
+  # CloudWatch Alarms
+  DLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ShopFast-DQL-Messages
+      AlarmDescription: 'Alerta cuando hay mensajes en DLQ'
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt PaymentDLQ.QueueName
+
+Outputs:
+  EventBusName:
+    Description: 'Nombre del Event Bus'
+    Value: !Ref ShopFastEventBus
+  
+  EventBusArn:
+    Description: 'ARN del Event Bus'
+    Value: !GetAtt ShopFastEventBus.Arn
+  
+  StepFunctionArn:
+    Description: 'ARN del Workflow de órdenes'
+    Value: !Ref OrderProcessingWorkflow
 ```
 
-### Comparación por Escenario de Carga
+### Código para Publicar Eventos
 
-| Métrica | EC2 | Serverless | Containers |
-|---------|-----|------------|------------|
-| **1,000 usuarios** | $533/mes | $549/mes | $502/mes |
-| **10,000 usuarios** | $1,200/mes | $1,800/mes | $1,100/mes |
-| **100,000 usuarios** | $5,500/mes | $12,000/mes | $4,800/mes |
-| **Escalado a 0** | No | $50/mes (base) | No |
+```javascript
+// Ejemplo: Publicar evento desde API
+const { EventBridgeClient, PutEventsCommand } = require('@aws-sdk/client-eventbridge');
 
-### Recomendaciones por Caso de Uso
+const eventBridge = new EventBridgeClient({ region: 'us-east-1' });
 
-| Caso de Uso | Arquitectura Recomendada | Por qué |
-|-------------|--------------------------|---------|
-| Startup MVP | Serverless | Time to market, pago por uso |
-| E-commerce estable | Containerizada | Balance costo/control |
-| Enterprise legacy | 3-Tier EC2 | Control total, migración gradual |
-| Data Analytics | Data Lake | Optimizado para big data |
-| IoT/Real-time | Event-driven serverless | Escalado automático extremo |
-| Gaming multiplayer | EC2 + GameLift | Latencia ultra-baja |
+async function publishOrderCompleted(order) {
+  const params = {
+    Entries: [
+      {
+        Source: 'shopfast.orders',
+        DetailType: 'Order Completed',
+        Detail: JSON.stringify({
+          orderId: order.id,
+          userId: order.userId,
+          userEmail: order.email,
+          amount: order.total,
+          items: order.items.map(item => ({
+            id: item.productId,
+            quantity: item.quantity
+          })),
+          status: 'confirmed',
+          timestamp: new Date().toISOString()
+        }),
+        EventBusName: 'shopfast-events'
+      }
+    ]
+  };
 
-## Estudios de Caso
+  try {
+    const result = await eventBridge.send(new PutEventsCommand(params));
+    console.log('Event published:', result.Entries[0].EventId);
+    return result;
+  } catch (error) {
+    console.error('Error publishing event:', error);
+    throw error;
+  }
+}
 
-### Migración de Aplicación Monolítica a Microservicios
+// Ejemplo: Lambda consumidor de SQS
+exports.handler = async (event) => {
+  for (const record of event.Records) {
+    // Parsear el mensaje de EventBridge enviado a SQS
+    const body = JSON.parse(record.body);
+    const detail = JSON.parse(body.detail);
+    
+    console.log('Processing order:', detail.orderId);
+    
+    try {
+      // Procesar el pago
+      await processPayment(detail);
+      
+      // Eliminar mensaje exitosamente (SQS auto-delete al success)
+    } catch (error) {
+      console.error('Payment processing failed:', error);
+      // Lanzar error para que SQS reintente o mande a DLQ
+      throw error;
+    }
+  }
+};
+```
 
-**Escenario:** Empresa de comercio electrónico con aplicación monolítica legacy que limita su capacidad de innovación y escalado.
+### Trade-offs Event-Driven
 
-**Arquitectura de Referencia:**
-- Descomposición en microservicios usando contenedores en ECS/EKS
-- Base de datos por servicio con RDS, DynamoDB
-- Orquestación con Step Functions
-- API Gateway para fachada unificada
-- Implementación progresiva con canary deployments
+| Aspecto | Ventaja | Desventaja | Cuándo usar |
+|---------|---------|------------|-------------|
+| **Acoplamiento** | Desacoplamiento total | Debugging distribuido | Múltiples sistemas deben reaccionar |
+| **Resiliencia** | Fallos aislados | Complejidad de retries | No se puede perder ningún evento |
+| **Escalabilidad** | Procesamiento paralelo | Eventual consistency | Alto volumen de eventos |
+| **Flexibilidad** | Nuevos consumidores sin cambiar productor | Schema evolution | Evolución frecuente del sistema |
 
-**Resultados:**
-- Reducción de tiempo de despliegue de semanas a horas
-- Mejora en resiliencia y escalabilidad
-- Equipos autónomos por dominio
-- Mayor agilidad para nuevas funcionalidades
+---
 
-### Implementación de Data Lake Empresarial
+## Patrón 5: Arquitectura Data Lake
 
-**Escenario:** Organización financiera necesita consolidar fuentes de datos dispersas para análisis avanzado y ML.
+### Problema Real
+ShopFast tiene datos distribuidos: logs de aplicación en CloudWatch, transacciones en RDS, comportamiento de usuarios en DynamoDB, logs de marketing en CSV. No pueden analizar "¿Qué productos ven los usuarios antes de comprar?" porque requiere unir 4 fuentes de datos.
 
-**Arquitectura de Referencia:**
-- S3 como almacenamiento centralizado
-- AWS Glue para catalogación y ETL
-- Redshift para data warehouse
-- EMR para procesamiento a gran escala
-- Athena para consultas ad-hoc
-- QuickSight para visualización
-- SageMaker para modelos predictivos
+### Solución Arquitectónica
+Centralizar todos los datos en S3 con estructura de Data Lake:
+- **Landing Zone:** Datos crudos (formato original)
+- **Raw Zone:** Datos validados y comprimidos
+- **Curated Zone:** Datos limpios y enriquecidos
+- **Analytics Zone:** Agregados para BI
 
-**Resultados:**
-- Visión unificada de datos corporativos
-- Reducción del tiempo de obtención de insights
-- Capacidades avanzadas de ML
-- Cumplimiento regulatorio mejorado
-- Reducción de costos de almacenamiento
+**Componentes:**
+- **S3:** Almacenamiento de datos (formato Parquet)
+- **Glue:** ETL, catalogación (Crawler, Jobs)
+- **Athena:** Queries SQL serverless
+- **Lake Formation:** Gobernanza y seguridad
+- **QuickSight:** Visualización y dashboards
 
-### Modernización de Contact Center
+### Diagrama de Arquitectura
 
-**Escenario:** Proveedor de servicios con sistema de atención telefónica tradicional busca mejorar experiencia y reducir costos.
+```mermaid
+graph TB
+    subgraph "Data Sources"
+        RDS[(RDS<br/>Transacciones)]
+        DDB[(DynamoDB<br/>Eventos)]
+        CW[CloudWatch<br/>Logs]
+        S3CSV[S3<br/>Marketing CSV]
+        APIExt[APIs Externas]
+    end
 
-**Arquitectura de Referencia:**
-- Amazon Connect como plataforma central
-- Lex para chatbots y IVR inteligente
-- Lambda para lógica personalizada
-- DynamoDB para datos de interacción
-- Kinesis para análisis en tiempo real
-- Comprehend para análisis de sentimiento
-- S3 y Athena para análisis histórico
+    subgraph "Ingesta"
+        GlueC1[Glue Crawler<br/>RDS]
+        GlueC2[Glue Crawler<br/>DynamoDB]
+        Kinesis[Kinesis Firehose<br/>Streaming]
+        DMS[Database Migration Service]
+    end
 
-**Resultados:**
-- Reducción de 40% en tiempo de gestión
-- Mejora de satisfacción del cliente
-- Implementación de canales omnicanal
-- Escalabilidad para picos estacionales
-- Insights profundos sobre interacciones
+    subgraph "Data Lake S3"
+        subgraph "Landing"
+            L1[landing/transacciones/]
+            L2[landing/eventos/]
+            L3[landing/logs/]
+        end
 
-## Conclusión
+        subgraph "Raw"
+            R1[raw/transacciones/]
+            R2[raw/eventos/]
+            R3[raw/logs/]
+        end
 
-Las arquitecturas de referencia de AWS proporcionan frameworks probados que aceleran la implementación de soluciones en la nube y mitigan riesgos. Sin embargo, no deben aplicarse como plantillas rígidas, sino como puntos de partida adaptables a los requisitos específicos de cada organización.
+        subgraph "Curated"
+            C1[curated/clientes/]
+            C2[curated/productos/]
+            C3[curated/ordenes/]
+            C4[curated/comportamiento/]
+        end
 
-El panorama tecnológico está en constante evolución, y las arquitecturas de referencia deben evolucionar igualmente. La adopción de prácticas como infraestructura como código, DevOps, y revisiones periódicas del Well-Architected Framework aseguran que las arquitecturas permanezcan óptimas a lo largo del tiempo.
+        subgraph "Analytics"
+            A1[analytics/ventas_diarias/]
+            A2[analytics/funnel/]
+            A3[analytics/retencion/]
+        end
+    end
 
-Las organizaciones más exitosas en la nube combinan estas arquitecturas de referencia con una cultura de experimentación, mejora continua y enfoque en resultados de negocio. No se trata solo de implementar una arquitectura técnicamente correcta, sino de crear sistemas que impulsen la innovación, mejoren la experiencia del cliente y proporcionen ventajas competitivas sostenibles.
+    subgraph "Processing"
+        GlueJ1[Glue Job<br/>ETL Limpieza]
+        GlueJ2[Glue Job<br/>Transformación]
+        GlueJ3[Glue Job<br/>Agregaciones]
+        EMR[EMR<br/>Big Data Processing]
+    end
 
-## Referencias y Recursos Adicionales
+    subgraph "Catalog & Governance"
+        GlueCat[(Glue Data Catalog)]
+        LF[Lake Formation]
+    end
 
-- [AWS Architecture Center](https://aws.amazon.com/architecture/)
-- [AWS Solutions Library](https://aws.amazon.com/solutions/)
-- [AWS Well-Architected Tool](https://aws.amazon.com/well-architected-tool/)
-- [AWS Reference Architecture Diagrams](https://aws.amazon.com/architecture/reference-architecture-diagrams/)
-- [AWS This Is My Architecture](https://aws.amazon.com/this-is-my-architecture/)
-- [AWS Blog](https://aws.amazon.com/blogs/aws/)
-- [AWS Workshops](https://workshops.aws/)
+    subgraph "Analytics"
+        Athena[Athena<br/>SQL Queries]
+        Redshift[(Redshift<br/>Data Warehouse)]
+        QuickSight[QuickSight<br/>Dashboards]
+        SageMaker[SageMaker<br/>ML Models]
+    end
+
+    RDS --> DMS
+    DDB --> GlueC2
+    CW --> Kinesis
+    S3CSV --> GlueC1
+    APIExt --> Kinesis
+
+    DMS --> L1
+    GlueC2 --> L2
+    Kinesis --> L3
+
+    L1 --> R1
+    L2 --> R2
+    L3 --> R3
+
+    R1 --> GlueJ1
+    R2 --> GlueJ1
+    R3 --> GlueJ1
+
+    GlueJ1 --> GlueJ2
+    GlueJ2 --> C1
+    GlueJ2 --> C2
+    GlueJ2 --> C3
+    GlueJ2 --> C4
+
+    C4 --> GlueJ3
+    GlueJ3 --> A1
+    GlueJ3 --> A2
+    GlueJ3 --> A3
+
+    C1 --> GlueCat
+    C2 --> GlueCat
+    C3 --> GlueCat
+    C4 --> GlueCat
+
+    GlueCat --> LF
+    LF --> Athena
+    LF --> QuickSight
+
+    C3 --> Redshift
+    C4 --> SageMaker
+```
+
+### Implementación con Terraform
+
+```hcl
+# data-lake-shopfast/main.tf
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# Variables
+variable "aws_region" {
+  default = "us-east-1"
+}
+
+variable "project_name" {
+  default = "shopfast-datalake"
+}
+
+variable "environment" {
+  default = "production"
+}
+
+# S3 Buckets para Data Lake
+resource "aws_s3_bucket" "data_lake" {
+  bucket = "${var.project_name}-${var.environment}"
+}
+
+resource "aws_s3_bucket_versioning" "data_lake" {
+  bucket = aws_s3_bucket.data_lake.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "data_lake" {
+  bucket = aws_s3_bucket.data_lake.id
+
+  rule {
+    id     = "transition-to-ia"
+    status = "Enabled"
+
+    transition {
+      days          = 90
+      storage_class = "STANDARD_IA"
+    }
+  }
+
+  rule {
+    id     = "transition-to-glacier"
+    status = "Enabled"
+
+    transition {
+      days          = 365
+      storage_class = "GLACIER"
+    }
+  }
+}
+
+# Carpetas del Data Lake (usando objetos dummy)
+locals {
+  zones = ["landing", "raw", "curated", "analytics"]
+}
+
+resource "aws_s3_object" "zones" {
+  for_each = toset(local.zones)
+
+  bucket  = aws_s3_bucket.data_lake.id
+  key     = "${each.value}/.keep"
+  content = ""
+}
+
+# Glue Data Catalog Database
+resource "aws_glue_catalog_database" "shopfast" {
+  name = "${var.project_name}_db"
+}
+
+# Glue Crawler para RDS
+resource "aws_glue_crawler" "rds_crawler" {
+  name          = "${var.project_name}-rds-crawler"
+  role          = aws_iam_role.glue_role.arn
+  database_name = aws_glue_catalog_database.shopfast.name
+
+  jdbc_target {
+    connection_name = aws_glue_connection.rds_connection.name
+    path            = "shopfast/%"
+  }
+
+  schedule = "cron(0 2 * * ? *)"  # 2 AM UTC diario
+}
+
+# Glue Connection para RDS
+resource "aws_glue_connection" "rds_connection" {
+  name = "${var.project_name}-rds-connection"
+
+  connection_properties = {
+    JDBC_CONNECTION_URL = "jdbc:postgresql://${aws_db_instance.shopfast.endpoint}/shopfast"
+    USERNAME            = "datalake_user"
+    PASSWORD            = "SecurePassword123!"
+  }
+
+  physical_connection_requirements {
+    availability_zone      = data.aws_availability_zones.available.names[0]
+    security_group_id_list = [aws_security_group.glue.id]
+    subnet_id              = aws_subnet.private[0].id
+  }
+}
+
+# Glue Crawler para S3
+resource "aws_glue_crawler" "s3_crawler" {
+  name          = "${var.project_name}-s3-crawler"
+  role          = aws_iam_role.glue_role.arn
+  database_name = aws_glue_catalog_database.shopfast.name
+
+  s3_target {
+    path = "s3://${aws_s3_bucket.data_lake.bucket}/curated/"
+  }
+
+  schedule = "cron(0 3 * * ? *)"  # 3 AM UTC diario
+}
+
+# Glue ETL Job - Transformación de órdenes
+resource "aws_glue_job" "transform_orders" {
+  name     = "${var.project_name}-transform-orders"
+  role_arn = aws_iam_role.glue_role.arn
+
+  command {
+    name            = "glueetl"
+    script_location = "s3://${aws_s3_bucket.data_lake.bucket}/scripts/transform-orders.py"
+    python_version  = "3.9"
+  }
+
+  default_arguments = {
+    "--job-language"              = "python"
+    "--enable-metrics"            = "true"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--enable-spark-ui"           = "true"
+    "--job-bookmark-option"       = "job-bookmark-enable"
+    "--source-path"               = "s3://${aws_s3_bucket.data_lake.bucket}/raw/ordenes/"
+    "--target-path"               = "s3://${aws_s3_bucket.data_lake.bucket}/curated/ordenes/"
+    "--TempDir"                   = "s3://${aws_s3_bucket.data_lake.bucket}/temp/"
+  }
+
+  max_retries  = 1
+  timeout      = 2880  # 48 horas
+  worker_type  = "G.1X"
+  number_of_workers = 2
+
+  glue_version = "4.0"
+}
+
+# Script ETL de ejemplo (subir a S3)
+resource "aws_s3_object" "etl_script" {
+  bucket = aws_s3_bucket.data_lake.id
+  key    = "scripts/transform-orders.py"
+  content = <<EOF
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue.dynamicframe import DynamicFrame
+
+args = getResolvedOptions(sys.argv, ['JOB_NAME', 'source-path', 'target-path'])
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+
+# Leer datos raw desde S3
+source_path = args['source_path']
+target_path = args['target_path']
+
+# Leer datos JSON
+raw_df = spark.read.json(f"{source_path}*/*/*.json")
+
+# Transformaciones
+from pyspark.sql.functions import col, to_date, year, month, dayofmonth
+
+cleaned_df = raw_df \
+    .filter(col("order_id").isNotNull()) \
+    .filter(col("total_amount") > 0) \
+    .withColumn("order_date", to_date(col("created_at"))) \
+    .withColumn("year", year(col("order_date"))) \
+    .withColumn("month", month(col("order_date"))) \
+    .withColumn("day", dayofmonth(col("order_date")))
+
+# Guardar en formato Parquet particionado
+cleaned_df.write \
+    .mode("overwrite") \
+    .partitionBy("year", "month", "day") \
+    .parquet(target_path)
+
+# Actualizar Glue Catalog
+glueContext.write_dynamic_frame.from_options(
+    frame=DynamicFrame.fromDF(cleaned_df, glueContext, "cleaned"),
+    connection_type="s3",
+    connection_options={
+        "path": target_path,
+        "partitionKeys": ["year", "month", "day"]
+    },
+    format="parquet"
+)
+
+job.commit()
+EOF
+}
+
+# Athena Workgroup
+resource "aws_athena_workgroup" "shopfast" {
+  name = "${var.project_name}-workgroup"
+
+  configuration {
+    enforce_workgroup_configuration    = true
+    publish_cloudwatch_metrics_enabled = true
+
+    result_configuration {
+      output_location = "s3://${aws_s3_bucket.data_lake.bucket}/athena-results/"
+
+      encryption_configuration {
+        encryption_option = "SSE_S3"
+      }
+    }
+  }
+}
+
+# Athena Named Query - Ejemplo
+resource "aws_athena_named_query" "daily_sales" {
+  name        = "daily-sales-report"
+  workgroup   = aws_athena_workgroup.shopfast.name
+  database    = aws_glue_catalog_database.shopfast.name
+  query       = <<-EOF
+    SELECT 
+      DATE(order_date) as date,
+      COUNT(*) as total_orders,
+      SUM(total_amount) as total_revenue,
+      AVG(total_amount) as avg_order_value
+    FROM curated_ordenes
+    WHERE year = year(current_date)
+      AND month = month(current_date)
+    GROUP BY DATE(order_date)
+    ORDER BY date DESC
+  EOF
+}
+
+# Lake Formation Permissions
+resource "aws_lakeformation_permissions" "analysts" {
+  principal   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AnalystRole"
+  permissions = ["SELECT", "DESCRIBE"]
+
+  table {
+    database_name = aws_glue_catalog_database.shopfast.name
+    name          = "curated_ordenes"
+  }
+}
+
+# IAM Role para Glue
+resource "aws_iam_role" "glue_role" {
+  name = "${var.project_name}-glue-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "glue.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "glue_policy" {
+  name = "${var.project_name}-glue-policy"
+  role = aws_iam_role.glue_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          aws_s3_bucket.data_lake.arn,
+          "${aws_s3_bucket.data_lake.arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "glue:*",
+          "athena:*"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+# Data sources
+resource "aws_db_instance" "shopfast" {
+  identifier     = "shopfast-source-db"
+  engine         = "postgres"
+  engine_version = "14.9"
+  instance_class = "db.t3.micro"
+  
+  allocated_storage = 20
+  storage_type      = "gp2"
+  
+  db_name  = "shopfast"
+  username = "postgres"
+  password = "SourceDBPassword123!"
+  
+  publicly_accessible = false
+  skip_final_snapshot = true
+}
+
+# Data para queries
+resource "aws_default_vpc" "default" {}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+resource "aws_subnet" "private" {
+  count             = 2
+  vpc_id            = aws_default_vpc.default.id
+  cidr_block        = "172.31.${count.index + 100}.0/24"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+}
+
+resource "aws_security_group" "glue" {
+  name        = "${var.project_name}-glue-sg"
+  description = "Security group for Glue connections"
+  vpc_id      = aws_default_vpc.default.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+data "aws_caller_identity" "current" {}
+
+# Outputs
+output "data_lake_bucket" {
+  value = aws_s3_bucket.data_lake.bucket
+}
+
+output "glue_database" {
+  value = aws_glue_catalog_database.shopfast.name
+}
+
+output "athena_workgroup" {
+  value = aws_athena_workgroup.shopfast.name
+}
+```
+
+### Ejemplo de Query Athena
+
+```sql
+-- Crear tabla de órdenes
+CREATE EXTERNAL TABLE IF NOT EXISTS curated_ordenes (
+  order_id string,
+  user_id string,
+  total_amount decimal(10,2),
+  status string,
+  items array<struct<product_id:string, quantity:int, price:decimal(10,2)>>,
+  shipping_address struct<street:string, city:string, country:string>
+)
+PARTITIONED BY (year int, month int, day int)
+STORED AS PARQUET
+LOCATION 's3://shopfast-datalake-production/curated/ordenes/';
+
+-- Reparar particiones
+MSCK REPAIR TABLE curated_ordenes;
+
+-- Query: Ventas por categoría en últimos 30 días
+SELECT 
+  i.product_id,
+  COUNT(*) as total_sales,
+  SUM(i.quantity) as total_quantity,
+  SUM(i.quantity * i.price) as total_revenue
+FROM curated_ordenes
+CROSS JOIN UNNEST(items) as t(i)
+WHERE order_date >= date_add('day', -30, current_date)
+  AND status = 'completed'
+GROUP BY i.product_id
+ORDER BY total_revenue DESC
+LIMIT 100;
+
+-- Query: Funnel de conversión
+WITH funnel AS (
+  SELECT 
+    user_id,
+    COUNT(DISTINCT CASE WHEN event_type = 'product_view' THEN product_id END) as products_viewed,
+    COUNT(DISTINCT CASE WHEN event_type = 'add_to_cart' THEN product_id END) as products_added,
+    COUNT(DISTINCT CASE WHEN event_type = 'checkout_started' THEN session_id END) as checkouts_started,
+    COUNT(DISTINCT CASE WHEN event_type = 'order_completed' THEN order_id END) as orders_completed
+  FROM curated_comportamiento
+  WHERE event_date >= date_add('day', -7, current_date)
+  GROUP BY user_id
+)
+SELECT 
+  COUNT(*) as total_users,
+  AVG(products_viewed) as avg_views,
+  AVG(products_added) as avg_added,
+  AVG(checkouts_started) as avg_checkouts,
+  AVG(orders_completed) as avg_orders,
+  -- Tasas de conversión
+  SUM(CASE WHEN products_added > 0 THEN 1.0 ELSE 0 END) / COUNT(*) as view_to_cart_rate,
+  SUM(CASE WHEN orders_completed > 0 THEN 1.0 ELSE 0 END) / COUNT(*) as overall_conversion_rate
+FROM funnel;
+```
+
+### Trade-offs Data Lake
+
+| Aspecto | Ventaja | Desventaja | Cuándo usar |
+|---------|---------|------------|-------------|
+| **Flexibilidad** | Schema-on-read | Governance compleja | Datos heterogéneos, exploración |
+| **Costo** | Almacenamiento barato (S3) | Query costs pueden escalar | Grandes volúmenes de datos históricos |
+| **Escalabilidad** | Escala a petabytes | Latencia en queries ad-hoc | Analytics, ML, reporting |
+| **Agilidad** | Nuevas fuentes sin cambios | Calidad de datos variada | Ingesta rápida de nuevas fuentes |
+
+---
+
+## Comparación de Patrones
+
+| Criterio | 3-Tier | Serverless | Microservicios | Event-Driven | Data Lake |
+|----------|--------|------------|----------------|--------------|-----------|
+| **Complejidad** | Media | Baja | Alta | Media-Alta | Media |
+| **Costo inicial** | $$ | $ | $$$ | $$ | $$ |
+| **Escalabilidad** | Manual | Automática | Independiente | Eventual | Query-based |
+| **Time to market** | Medio | Rápido | Lento | Medio | Medio |
+| **Equipo mínimo** | 3-5 | 1-2 | 8+ | 4-6 | 3-5 |
+| **Casos de uso** | E-commerce tradicional | Startups, MVP | Grandes empresas | Sistemas distribuidos | Analytics, ML |
+
+---
+
+## Anti-patrones y Troubleshooting
+
+### Anti-patrones
+
+```markdown
+## ❌ Anti-patrón: Monolito distribuido
+**Problema:** Servicios acoplados que siempre se llaman síncronamente.
+**Síntoma:** Un servicio lento afecta a todos.
+**Solución:** Usar eventos asíncronos entre dominios independientes.
+
+## ❌ Anti-patrón: Data Lake como Data Swamp
+**Problema:** Guardar datos sin estructura ni documentación.
+**Síntoma:** Nadie sabe qué datos existen ni qué significan.
+**Solución:** Implementar Data Catalog, tags, y documentación obligatoria.
+
+## ❌ Anti-patrón: Serverless para todo
+**Problema:** Usar Lambda para procesos de larga duración.
+**Síntoma:** Timeouts, costos inesperados, debugging difícil.
+**Solución:** Fargate para procesos >15 min, Lambda para eventos.
+
+## ❌ Anti-patrón: Microservicios prematuros
+**Problema:** Dividir antes de entender el dominio.
+**Síntoma:** Servicios compartidos, deployments coordinados.
+**Solución:** Monolito modular primero, extraer cuando haya fricción real.
+```
+
+### Troubleshooting Común
+
+```markdown
+## Problema: Latencia en 3-Tier
+### Diagnóstico:
+1. Ver CloudWatch Latency por tier
+2. Revisar conexiones a base de datos
+3. Verificar cache hit ratio
+
+### Soluciones:
+- Implementar Redis entre app y DB
+- Usar RDS Proxy para connection pooling
+- Agregar read replicas
+
+## Problema: Cold starts en Lambda
+### Diagnóstico:
+1. Revisar CloudWatch Logs init duration
+2. Verificar tamaño del package
+3. Revisar configuración de VPC
+
+### Soluciones:
+- Usar Provisioned Concurrency
+- Reducir tamaño del deployment
+- Evitar VPC para funciones simples
+- Usar SnapStart (Java)
+
+## Problema: Throttling en DynamoDB
+### Diagnóstico:
+1. Revisar métricas Consumed vs Provisioned
+2. Verificar hot keys
+3. Revisar patrones de acceso
+
+### Soluciones:
+- Cambiar a On-Demand
+- Implementar DAX (cache)
+- Re-diseñar partition keys
+- Usar SQS para buffer de escrituras
+```
+
+---
+
+## Ejercicio Práctico
+
+### Laboratorio: Migrar ShopFast desde monolito
+
+**Escenario:** Tienes una aplicación monolítica en EC2 que maneja todo: productos, carrito, pagos, usuarios. Debes migrarla usando uno de los patrones.
+
+#### Paso 1: Análisis actual
+```bash
+# Identificar endpoints y tráfico
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/ApplicationELB \
+  --metric-name RequestCount \
+  --dimensions Name=LoadBalancer,Value=app/shopfast/50dc6c495c0c9188 \
+  --start-time 2024-01-01T00:00:00Z \
+  --end-time 2024-01-31T23:59:59Z \
+  --period 86400 \
+  --statistics Sum
+```
+
+#### Paso 2: Diseñar la arquitectura objetivo
+Dibuja:
+- Qué componentes separar
+- Cómo se comunicarán
+- Dónde estarán los datos
+- Cómo manejarás la migración
+
+#### Paso 3: Implementar MVP
+Elige UN servicio para extraer primero (ej: catálogo de productos) y:
+1. Crear el nuevo servicio con el patrón elegido
+2. Implementar API Gateway/ALB para routing
+3. Configurar base de datos independiente
+4. Migrar datos de prueba
+5. Implementar feature flag para redirigir tráfico
+
+#### Paso 4: Validar
+```bash
+# Pruebas de carga
+ab -n 10000 -c 100 http://your-endpoint/products
+
+# Verificar latencia
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/ApiGateway \
+  --metric-name Latency \
+  --dimensions Name=ApiName,Value=shopfast-api \
+  --start-time $(date -u -v-1H +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 60 \
+  --statistics Average
+```
+
+---
+
+## Recursos adicionales
+
+- **AWS Well-Architected Framework:** https://aws.amazon.com/architecture/well-architected/
+- **AWS Reference Architectures:** https://aws.amazon.com/architecture/reference-architecture/
+- **AWS Solutions Library:** https://aws.amazon.com/solutions/
+- **AWS Patterns:** https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/welcome.html
